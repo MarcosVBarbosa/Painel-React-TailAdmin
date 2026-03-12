@@ -7,12 +7,13 @@ import {
   TableBody,
 } from "../ui/table";
 import { useState } from "react";
+import { PencilIcon, TrashBinIcon } from "../../icons";
 
 interface BasicTableProps {
   dataTable: DataTableBasic;
 }
 
-export default function DataTableOne({ dataTable }: BasicTableProps) {
+export default function BasicTable({ dataTable }: BasicTableProps) {
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
 
   const { columns, rows, title } = dataTable;
@@ -48,6 +49,13 @@ export default function DataTableOne({ dataTable }: BasicTableProps) {
                   {column.title}
                 </TableCell>
               ))}
+
+              <TableCell
+                isHeader
+                className="px-5 py-3 text-md font-semibold text-gray-700 text-center dark:text-gray-300"
+              >
+                Ações
+              </TableCell>
             </TableRow>
           </TableHeader>
 
@@ -74,6 +82,33 @@ export default function DataTableOne({ dataTable }: BasicTableProps) {
                     {row[column.field]}
                   </TableCell>
                 ))}
+
+                <TableCell
+                  style={{ width: 100 }}
+                  className="px-5 py-3 text-center"
+                >
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      console.log("Editar", row.id);
+                    }}
+                    title="Editar"
+                    className="text-blue-500 hover:text-blue-700"
+                  >
+                    <PencilIcon className="size-6" />
+                  </button>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      console.log("Excluir", row.id);
+                    }}
+                    title="Excluir"
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <TrashBinIcon className="size-6" />
+                  </button>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
