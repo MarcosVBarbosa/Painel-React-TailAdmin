@@ -8,19 +8,29 @@ const LayoutContent: React.FC = () => {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
 
   return (
-    <div className="min-h-screen xl:flex">
-      <div>
+    // 1) Raiz da página ocupa a viewport
+    <div className="min-h-screen w-full bg-gray-50 dark:bg-[#0B1220]">
+      {/* 2) Linha principal: sidebar + conteúdo */}
+      <div className="flex min-h-screen">
+        {/* Sidebar fixa (sem wrapper extra que quebre a altura) */}
         <AppSidebar />
         <Backdrop />
-      </div>
-      <div
-        className={`flex-1 transition-all duration-300 ease-in-out ${
-          isExpanded || isHovered ? "lg:ml-[290px]" : "lg:ml-[90px]"
-        } ${isMobileOpen ? "ml-0" : ""}`}
-      >
-        <AppHeader />
-        <div className="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">
-          <Outlet />
+
+        {/* 3) Coluna da direita precisa permitir expansão vertical */}
+        <div
+          className={`flex min-h-0 flex-1 flex-col transition-all duration-300 ease-in-out
+            ${isExpanded || isHovered ? "lg:ml-[290px]" : "lg:ml-[90px]"}
+            ${isMobileOpen ? "ml-0" : ""}`}
+        >
+          {/* Header com altura fixa */}
+          <AppHeader />
+
+          {/* 4) Área de conteúdo elástica */}
+          <main className="flex-1 min-h-0">
+            <div className="h-full p-4 md:p-6 mx-auto max-w-(--breakpoint-1xl)">
+              <Outlet />
+            </div>
+          </main>
         </div>
       </div>
     </div>

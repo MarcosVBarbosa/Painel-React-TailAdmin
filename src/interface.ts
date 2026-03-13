@@ -18,5 +18,7 @@ export interface DataTableBasic {
   columns: Column[];
   rows: Row[];
   title: string;
-  action?: boolean;
+  new?: boolean;
+  edit?: boolean;
+  delete?: boolean;
 }

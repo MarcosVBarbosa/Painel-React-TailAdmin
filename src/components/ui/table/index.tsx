@@ -1,3 +1,4 @@
+// src/components/ui/table.tsx
 import {
   ReactNode,
   ThHTMLAttributes,
@@ -5,31 +6,27 @@ import {
   HTMLAttributes,
 } from "react";
 
-// Props for Table
+/* ---------- Tipagens ---------- */
 interface TableProps {
   children: ReactNode;
   className?: string;
 }
 
-// Props for TableHeader
 interface TableHeaderProps {
   children: ReactNode;
   className?: string;
 }
 
-// Props for TableBody
 interface TableBodyProps {
   children: ReactNode;
   className?: string;
 }
 
-// Props for TableRow
 interface TableRowProps extends HTMLAttributes<HTMLTableRowElement> {
   children: ReactNode;
   className?: string;
 }
 
-// Props for TableCell
 interface TableCellProps
   extends
     ThHTMLAttributes<HTMLTableCellElement>,
@@ -39,22 +36,27 @@ interface TableCellProps
   className?: string;
 }
 
-// Table Component
+/** NOVO */
+interface TableFooterProps {
+  children: ReactNode;
+  className?: string;
+}
+
+/* ---------- Componentes ---------- */
+
+// Table component:
 const Table: React.FC<TableProps> = ({ children, className }) => {
-  return <table className={`min-w-full ${className}`}>{children}</table>;
+  return <table className={`w-full table-fixed ${className ?? ""}`}>{children}</table>;
 };
 
-// TableHeader Component
 const TableHeader: React.FC<TableHeaderProps> = ({ children, className }) => {
   return <thead className={className}>{children}</thead>;
 };
 
-// TableBody Component
 const TableBody: React.FC<TableBodyProps> = ({ children, className }) => {
   return <tbody className={className}>{children}</tbody>;
 };
 
-// TableRow Component
 const TableRow: React.FC<TableRowProps> = ({
   children,
   className,
@@ -67,15 +69,13 @@ const TableRow: React.FC<TableRowProps> = ({
   );
 };
 
-// TableCell Component
 const TableCell: React.FC<TableCellProps> = ({
   children,
   isHeader = false,
   className,
   ...props
 }) => {
-  const CellTag = isHeader ? "th" : "td";
-
+  const CellTag = (isHeader ? "th" : "td") as "th" | "td";
   return (
     <CellTag className={className} {...props}>
       {children}
@@ -83,4 +83,9 @@ const TableCell: React.FC<TableCellProps> = ({
   );
 };
 
-export { Table, TableHeader, TableBody, TableRow, TableCell };
+/** NOVO: TableFooter */
+const TableFooter: React.FC<TableFooterProps> = ({ children, className }) => {
+  return <tfoot className={className}>{children}</tfoot>;
+};
+
+export { Table, TableHeader, TableBody, TableRow, TableCell, TableFooter };
