@@ -1,17 +1,16 @@
-// src/components/BasicTable/index.tsx
 import { DataTableBasic } from "../../interface";
-import { UserRoundPlus } from "lucide-react";
+import { Grid2x2, List, UserRoundPlus } from "lucide-react";
 import {
   Table,
   TableHeader,
   TableRow,
   TableCell,
   TableBody,
-} from "../ui/table"; // não usamos <TableFooter> dentro da <table>
+} from "../ui/table";
 import { useMemo, useRef, useState, useEffect } from "react";
 import { PencilIcon, TrashBinIcon } from "../../icons";
 import Button from "../ui/button/Button";
-import TableNumberedPaginationFooter from "../ui/PaginationTable/PaginationTable";
+import TableNumberedPaginationFooter from "../ui/PaginationTable/PaginationTable"; // <-- (confira o path)
 import { useAutoPageSize } from "../../hooks/useAutoPageSize";
 
 interface BasicTableProps {
@@ -32,54 +31,37 @@ export default function BasicTable({
 
   const { columns, rows, title } = dataTable;
 
-  // === PAGE SIZE automático (usa 65px por linha como você pediu) ===
   const { autoPageSize } = useAutoPageSize({
     scrollContainerRef: scrollRef,
     rowHeight: 65,
-    safetyGap: 2, // evita scroll por 1px de borda/sombra
+    safetyGap: 2,
     min: 1,
   });
 
-  // Se quiser priorizar o pageSize externo, use: const effectivePageSize = extPageSize ?? autoPageSize;
   const effectivePageSize = extPageSize ?? autoPageSize;
 
-  // paginação local (se não vier 'page' de fora)
   const [page, setPage] = useState(1);
   const currentPage = extPage ?? page;
 
   const total = extTotal ?? rows.length;
 
-  // Se o pageSize mudar e a página atual ficar "fora", ajusta
   useEffect(() => {
     const lastPage = Math.max(1, Math.ceil(total / effectivePageSize));
     if (currentPage > lastPage && extPage === undefined) {
       setPage(lastPage);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [effectivePageSize, total]);
-
-  // Sempre que mudar layout (ex.: abrir/fechar sidebar), você pode chamar recompute()
-  // Ex.: useEffect(() => { recompute(); }, [isExpanded, isHovered, isMobileOpen]);
+  }, [effectivePageSize, total, currentPage, extPage]);
 
   const pageRows = useMemo(() => {
-    if (extPage !== undefined) {
-      // modo controlado: o pai já manda as linhas paginadas/filtradas (ou controla página fora)
-      const startIdx = (currentPage - 1) * effectivePageSize;
-      return rows.slice(startIdx, startIdx + effectivePageSize);
-    }
-    // modo não-controlado: corta localmente
     const startIdx = (currentPage - 1) * effectivePageSize;
     return rows.slice(startIdx, startIdx + effectivePageSize);
-  }, [rows, currentPage, effectivePageSize, extPage]);
+  }, [rows, currentPage, effectivePageSize]);
 
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-white/[0.05] dark:bg-white/[0.03]">
-      {/* SCROLL CONTAINER (tem o ref que o hook usa para medir) */}
       <div ref={scrollRef} className="flex-1 min-h-0 overflow-auto">
         <div className="flex min-h-full flex-col">
-          {/* Tabela */}
-          <Table className="w-full table-fixed">
-            {/* Header sticky */}
+          <Table className="w-full">
             <TableHeader className="sticky top-0 z-10 border-b border-gray-100 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:border-white/[0.05] dark:bg-[#0B1220]/80">
               {/* Título */}
               <TableRow>
@@ -89,20 +71,38 @@ export default function BasicTable({
                   className="px-5 py-4"
                 >
                   <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
-                      {title}
-                    </h2>
-                    <Button
-                      size="sm"
-                      startIcon={UserRoundPlus}
-                      variant="primary"
-                      toolTip={{ text: "Novo Usuário", position: "left" }}
-                    />
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-[30px] pe-1 font-semibold text-gray-800 dark:text-white">
+                        {title}
+                      </h2>
+                      <Button
+                        size="sm"
+                        startIcon={UserRoundPlus}
+                        variant="success"
+                        toolTip={{ text: "Novo", position: "right" }}
+                      />
+                    </div>
+                    <div>
+                      <div className="tex shadow-theme-xs inline-flex items-center">
+                        <button
+                          type="button"
+                          className="bg-brand-500 ring-brand-500 hover:bg-brand-500 inline-flex items-center gap-2 px-4 py-3 text-sm font-medium text-white ring-1 ring-inset transition first:rounded-l-lg last:rounded-r-lg"
+                        >
+                          <List />
+                        </button>
+                        <button
+                          type="button"
+                          className="text-brand-500 ring-brand-500 hover:bg-brand-500 -ml-px inline-flex items-center gap-2 bg-transparent px-4 py-3 text-sm font-medium ring-1 ring-inset first:rounded-l-lg last:rounded-r-lg hover:text-white"
+                        >
+                          <Grid2x2 />
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </TableCell>
               </TableRow>
 
-              {/* Cabeçalhos das colunas */}
+              {/* Cabeçalhos */}
               <TableRow>
                 {columns.map((column) => (
                   <TableCell
@@ -113,16 +113,10 @@ export default function BasicTable({
                     {column.title}
                   </TableCell>
                 ))}
-                <TableCell
-                  isHeader
-                  className="w-[180px] px-5 py-3 text-center text-md font-semibold text-gray-700 dark:text-gray-300"
-                >
-                  Opções
-                </TableCell>
+                <TableCell isHeader> </TableCell>
               </TableRow>
             </TableHeader>
 
-            {/* Body */}
             <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
               {pageRows.map((row) => (
                 <TableRow
@@ -138,27 +132,35 @@ export default function BasicTable({
                     <TableCell
                       key={column.id}
                       style={column.style}
-                      className={`px-5 py-3 text-gray-700 dark:text-gray-300 ${
-                        column.className ?? "text-center"
+                      className={`px-5 py-3 text-gray-700 dark:text-gray-300 text-center ${
+                        column.className ?? ""
                       }`}
                     >
                       {row[column.field]}
                     </TableCell>
                   ))}
 
-                  <TableCell className="px-5 py-3">
-                    <div className="flex w-full justify-between">
+                  {/* Ações */}
+                  <TableCell className="px-5 py-3 w-28">
+                    <div className="flex w-26 justify-between">
                       <Button
                         size="sm"
                         startIcon={PencilIcon}
                         variant="primary"
-                        toolTip={{ text: "Editar Usuário" }}
+                        toolTip={{ text: "Editar" }}
+                        onClick={() => {
+                          console.log("Editar", row.id);
+                        }}
                       />
+
                       <Button
                         size="sm"
                         startIcon={TrashBinIcon}
                         variant="danger"
-                        toolTip={{ text: "Deletar Usuário" }}
+                        toolTip={{ text: "Deletar" }}
+                        onClick={() => {
+                          console.log("Deletar", row.id);
+                        }}
                       />
                     </div>
                   </TableCell>
@@ -167,17 +169,13 @@ export default function BasicTable({
             </TableBody>
           </Table>
 
-          {/* Faux footer:
-              - data-pagination-footer: o hook encontra e mede a altura
-              - mt-auto: empurra para o fundo quando não há scroll
-              - sticky bottom-0: fixa no fundo quando há scroll */}
+          {/* Paginação (fora da tabela, em <div>) */}
           <div
             data-pagination-footer
             className="mt-auto sticky bottom-0 z-10 border-t border-gray-100 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:border-white/[0.05] dark:bg-[#0B1220]/80"
           >
-            <div className="px-5 py-2">
+            <div className="px-5 py-2 flex justify-end">
               <TableNumberedPaginationFooter
-                colSpan={1} // irrelevante nesta abordagem (mantido por compat)
                 page={currentPage}
                 pageSize={effectivePageSize}
                 total={total}

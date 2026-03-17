@@ -3,7 +3,7 @@ import Tooltip from "../Tooltip/Tooltip";
 
 const variantClasses = {
   success:
-    "bg-green-500 text-white hover:bg-green-600 dark:bg-transparent dark:border dark:border-green-500 dark:text-green-400 dark:hover:bg-green-500/10",
+    "bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-transparent dark:border dark:border-emerald-600 dark:text-emerald-500 dark:hover:bg-emerald-600/10",
   danger:
     "bg-red-500 text-white hover:bg-red-600 dark:bg-transparent dark:border dark:border-red-500 dark:text-red-400 dark:hover:bg-red-500/10",
   warning:
@@ -23,7 +23,7 @@ interface ButtonProps {
   variant?: ButtonVariant;
   startIcon?: ElementType;
   endIcon?: ElementType;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   toolTip?: {
     text?: string;
     position?: TooltipPosition;
@@ -44,7 +44,7 @@ const Button = ({
   disabled = false,
 }: ButtonProps) => {
   const sizeClasses = {
-    sm: "px-4 py-3 text-md",
+    sm: "px-3 py-2.5 text-[24px]",
     md: "px-5 py-3.5 text-md",
   };
 
@@ -63,11 +63,10 @@ const Button = ({
     </button>
   );
 
-  // Só envolve com Tooltip se houver texto não-vazio
   const hasTooltip = !!toolTip?.text && toolTip.text.trim().length > 0;
 
   return hasTooltip ? (
-    <Tooltip text={toolTip!.text!} placement={toolTip?.position ?? "top"}>
+    <Tooltip text={toolTip.text!} placement={toolTip?.position ?? "top"}>
       {btn}
     </Tooltip>
   ) : (

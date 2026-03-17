@@ -1,8 +1,6 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { TableRow, TableCell } from "../table";
 
 interface TableNumberedPaginationFooterProps {
-  colSpan: number;
   page: number; // 1-based
   pageSize: number;
   total: number;
@@ -21,11 +19,12 @@ function getPaginationRange(
 ): (number | "...")[] {
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
-  const totalPageNumbers = siblingCount + 5;
   // 5 = first + last + current + 2*ellipses (em casos grandes)
+  const totalPageNumbers = siblingCount + 5;
 
   if (totalPageNumbers >= totalPages) {
     return Array.from({ length: totalPages }, (_, i) => i + 1);
+    // [1..totalPages]
   }
 
   const leftSibling = Math.max(page - siblingCount, 1);
@@ -35,7 +34,6 @@ function getPaginationRange(
   const showRightDots = rightSibling < totalPages - 1;
 
   const range: (number | "...")[] = [];
-
   // Sempre inclui a primeira página
   range.push(1);
 
@@ -62,7 +60,6 @@ function getPaginationRange(
 }
 
 export default function TableNumberedPaginationFooter({
-  colSpan,
   page,
   pageSize,
   total,
@@ -85,65 +82,63 @@ export default function TableNumberedPaginationFooter({
   const btnDisabled = "opacity-50 cursor-not-allowed";
 
   return (
-    <TableRow>
-      <TableCell colSpan={colSpan} className={`px-5 py-3 ${className}`}>
-        <nav
-          className="flex items-center justify-center gap-2"
-          role="navigation"
-          aria-label="Pagination"
+    <div className={`px-5 py-3 ${className}`}>
+      <nav
+        className="flex items-center justify-center gap-2"
+        role="navigation"
+        aria-label="Pagination"
+      >
+        {/* Previous */}
+        <button
+          type="button"
+          onClick={() => canPrev && onPageChange(page - 1)}
+          disabled={!canPrev}
+          className={`${btnBase} ${btnNeutral} ${!canPrev ? btnDisabled : ""}`}
+          aria-label="Página anterior"
         >
-          {/* Previous */}
-          <button
-            type="button"
-            onClick={() => canPrev && onPageChange(page - 1)}
-            disabled={!canPrev}
-            className={`${btnBase} ${btnNeutral} ${!canPrev ? btnDisabled : ""}`}
-            aria-label="Página anterior"
-          >
-            <ChevronLeft />
-          </button>
+          <ChevronLeft />
+        </button>
 
-          {/* Números + reticências */}
-          {items.map((it, idx) => {
-            if (it === "...") {
-              return (
-                <span
-                  key={`dots-${idx}`}
-                  className="px-2 select-none text-gray-400 dark:text-gray-500"
-                  aria-hidden
-                >
-                  …
-                </span>
-              );
-            }
-
-            const isActive = it === page;
+        {/* Números + reticências */}
+        {items.map((it, idx) => {
+          if (it === "...") {
             return (
-              <button
-                key={it}
-                type="button"
-                onClick={() => onPageChange(it as number)}
-                className={`${btnBase} ${isActive ? btnActive : btnNeutral}`}
-                aria-current={isActive ? "page" : undefined}
-                aria-label={`Ir para página ${it}`}
+              <span
+                key={`dots-${idx}`}
+                className="px-2 select-none text-gray-400 dark:text-gray-500"
+                aria-hidden
               >
-                {it}
-              </button>
+                …
+              </span>
             );
-          })}
+          }
 
-          {/* Next */}
-          <button
-            type="button"
-            onClick={() => canNext && onPageChange(page + 1)}
-            disabled={!canNext}
-            className={`${btnBase} ${btnNeutral} ${!canNext ? btnDisabled : ""}`}
-            aria-label="Próxima página"
-          >
-            <ChevronRight />
-          </button>
-        </nav>
-      </TableCell>
-    </TableRow>
+          const isActive = it === page;
+          return (
+            <button
+              key={it}
+              type="button"
+              onClick={() => onPageChange(it as number)}
+              className={`${btnBase} ${isActive ? btnActive : btnNeutral}`}
+              aria-current={isActive ? "page" : undefined}
+              aria-label={`Ir para página ${it}`}
+            >
+              {it}
+            </button>
+          );
+        })}
+
+        {/* Next */}
+        <button
+          type="button"
+          onClick={() => canNext && onPageChange(page + 1)}
+          disabled={!canNext}
+          className={`${btnBase} ${btnNeutral} ${!canNext ? btnDisabled : ""}`}
+          aria-label="Próxima página"
+        >
+          <ChevronRight />
+        </button>
+      </nav>
+    </div>
   );
 }

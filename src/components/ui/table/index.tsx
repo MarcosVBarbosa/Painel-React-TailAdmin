@@ -46,7 +46,7 @@ interface TableFooterProps {
 
 // Table component:
 const Table: React.FC<TableProps> = ({ children, className }) => {
-  return <table className={`w-full table-fixed ${className ?? ""}`}>{children}</table>;
+  return <table className={`w-full ${className ?? ""}`}>{children}</table>;
 };
 
 const TableHeader: React.FC<TableHeaderProps> = ({ children, className }) => {

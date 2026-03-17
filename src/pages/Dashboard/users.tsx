@@ -11,6 +11,7 @@ const columns: Column[] = [
     id: 2,
     title: "Nivel",
     field: "nivel",
+    className: "w-20",
   },
   {
     id: 3,
@@ -21,11 +22,18 @@ const columns: Column[] = [
     id: 4,
     title: "Status",
     field: "status",
+    className: "w-20",
   },
 ];
 
 const rows: Row[] = [
-  { id: 1, name: "Marcos", nivel: "Admin", contato: "", status: "Ativo" },
+  {
+    id: 1,
+    name: "Marcos Vinicius Barbosa",
+    nivel: "Admin",
+    contato: "marcos-vinicius1014@hotmail.com",
+    status: "Ativo",
+  },
   { id: 2, name: "João", nivel: "User", contato: "", status: "Inativo" },
   { id: 3, name: "Maria", nivel: "User", contato: "", status: "Ativo" },
   { id: 4, name: "Ana", nivel: "Admin", contato: "", status: "Ativo" },
