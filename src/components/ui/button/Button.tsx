@@ -44,7 +44,7 @@ const Button = ({
   disabled = false,
 }: ButtonProps) => {
   const sizeClasses = {
-    sm: "px-3 py-2.5 text-[24px]",
+    sm: "px-3 py-2.5 text-[18px]",
     md: "px-5 py-3.5 text-md",
   };
 

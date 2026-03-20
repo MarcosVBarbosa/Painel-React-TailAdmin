@@ -1,5 +1,7 @@
+import { useState, useEffect } from "react";
 import BasicTable from "../../components/tables/BasicTable";
-import { Column, DataTableBasic, Row } from "../../interface";
+import { Column, Row } from "../../interface";
+import UserMetaCard from "../../components/UserProfile/UserMetaCard";
 
 const columns: Column[] = [
   {
@@ -26,84 +28,60 @@ const columns: Column[] = [
   },
 ];
 
-const rows: Row[] = [
-  {
-    id: 1,
-    name: "Marcos Vinicius Barbosa",
-    nivel: "Admin",
-    contato: "marcos-vinicius1014@hotmail.com",
-    status: "Ativo",
-  },
-  { id: 2, name: "João", nivel: "User", contato: "", status: "Inativo" },
-  { id: 3, name: "Maria", nivel: "User", contato: "", status: "Ativo" },
-  { id: 4, name: "Ana", nivel: "Admin", contato: "", status: "Ativo" },
-  { id: 5, name: "Carlos", nivel: "User", contato: "", status: "Inativo" },
-  { id: 6, name: "Fernanda", nivel: "User", contato: "", status: "Ativo" },
-  { id: 7, name: "Ricardo", nivel: "Admin", contato: "", status: "Ativo" },
-  { id: 8, name: "Sofia", nivel: "User", contato: "", status: "Inativo" },
-  { id: 9, name: "Bruno", nivel: "User", contato: "", status: "Ativo" },
-  { id: 10, name: "Isabela", nivel: "Admin", contato: "", status: "Ativo" },
-  { id: 11, name: "Gustavo", nivel: "User", contato: "", status: "Inativo" },
-  { id: 12, name: "Larissa", nivel: "User", contato: "", status: "Ativo" },
-  { id: 13, name: "Felipe", nivel: "Admin", contato: "", status: "Ativo" },
-  { id: 14, name: "Camila", nivel: "User", contato: "", status: "Inativo" },
-  { id: 15, name: "Rafael", nivel: "User", contato: "", status: "Ativo" },
-  { id: 16, name: "Juliana", nivel: "Admin", contato: "", status: "Ativo" },
-  { id: 17, name: "Leonardo", nivel: "User", contato: "", status: "Inativo" },
-  { id: 18, name: "Amanda", nivel: "User", contato: "", status: "Ativo" },
-  { id: 19, name: "Thiago", nivel: "Admin", contato: "", status: "Ativo" },
-  { id: 20, name: "Isabela", nivel: "Admin", contato: "", status: "Ativo" },
-  { id: 21, name: "Gustavo", nivel: "User", contato: "", status: "Inativo" },
-  { id: 22, name: "Larissa", nivel: "User", contato: "", status: "Ativo" },
-  { id: 23, name: "Felipe", nivel: "Admin", contato: "", status: "Ativo" },
-  { id: 24, name: "Camila", nivel: "User", contato: "", status: "Inativo" },
-  { id: 25, name: "Rafael", nivel: "User", contato: "", status: "Ativo" },
-  { id: 26, name: "Juliana", nivel: "Admin", contato: "", status: "Ativo" },
-  { id: 27, name: "Leonardo", nivel: "User", contato: "", status: "Inativo" },
-  { id: 28, name: "Amanda", nivel: "User", contato: "", status: "Ativo" },
-  { id: 29, name: "Thiago", nivel: "Admin", contato: "", status: "Ativo" },
-  { id: 30, name: "Isabela", nivel: "Admin", contato: "", status: "Ativo" },
-  { id: 31, name: "Gustavo", nivel: "User", contato: "", status: "Inativo" },
-  { id: 32, name: "Larissa", nivel: "User", contato: "", status: "Ativo" },
-  { id: 33, name: "Felipe", nivel: "Admin", contato: "", status: "Ativo" },
-  { id: 34, name: "Camila", nivel: "User", contato: "", status: "Inativo" },
-  { id: 35, name: "Rafael", nivel: "User", contato: "", status: "Ativo" },
-  { id: 36, name: "Juliana", nivel: "Admin", contato: "", status: "Ativo" },
-  { id: 37, name: "Leonardo", nivel: "User", contato: "", status: "Inativo" },
-  { id: 38, name: "Amanda", nivel: "User", contato: "", status: "Ativo" },
-  { id: 39, name: "Thiago", nivel: "Admin", contato: "", status: "Ativo" },
-  { id: 40, name: "Isabela", nivel: "Admin", contato: "", status: "Ativo" },
-  { id: 41, name: "Gustavo", nivel: "User", contato: "", status: "Inativo" },
-  { id: 42, name: "Larissa", nivel: "User", contato: "", status: "Ativo" },
-  { id: 43, name: "Felipe", nivel: "Admin", contato: "", status: "Ativo" },
-  { id: 44, name: "Camila", nivel: "User", contato: "", status: "Inativo" },
-  { id: 45, name: "Rafael", nivel: "User", contato: "", status: "Ativo" },
-  { id: 46, name: "Juliana", nivel: "Admin", contato: "", status: "Ativo" },
-  { id: 47, name: "Leonardo", nivel: "User", contato: "", status: "Inativo" },
-  { id: 48, name: "Amanda", nivel: "User", contato: "", status: "Ativo" },
-  { id: 49, name: "Thiago", nivel: "Admin", contato: "", status: "Ativo" },
-  { id: 50, name: "Isabela", nivel: "Admin", contato: "", status: "Ativo" },
-  { id: 51, name: "Gustavo", nivel: "User", contato: "", status: "Inativo" },
-  { id: 52, name: "Larissa", nivel: "User", contato: "", status: "Ativo" },
-  { id: 53, name: "Felipe", nivel: "Admin", contato: "", status: "Ativo" },
-  { id: 54, name: "Camila", nivel: "User", contato: "", status: "Inativo" },
-  { id: 55, name: "Rafael", nivel: "User", contato: "", status: "Ativo" },
-  { id: 56, name: "Juliana", nivel: "Admin", contato: "", status: "Ativo" },
-  { id: 57, name: "Leonardo", nivel: "User", contato: "", status: "Inativo" },
-  { id: 58, name: "Amanda", nivel: "User", contato: "", status: "Ativo" },
-  { id: 59, name: "Thiago", nivel: "Admin", contato: "", status: "Ativo" },
-];
-
-const dataTable: DataTableBasic = {
-  columns,
-  rows,
-  title: "Lista de Usuários",
-};
-
 export default function Users() {
+  const [rows, setRows] = useState<Row[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    fetch("https://dummyjson.com/users?limit=100")
+      .then((res) => res.json())
+      .then((data) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const mappedRows = data.users.map((u: any) => ({
+          id: u.id,
+          name: `${u.firstName} ${u.lastName}`,
+          nivel: `${u.id % 2 == 0 ? "Básico" : "Administrador"}`,
+          contato: u.email,
+          status: `${u.id % 2 != 0 ? "Ativo" : "Inativo"}`,
+        }));
+        setRows(mappedRows);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Erro ao carregar usuários:", err);
+        setLoading(false);
+      });
+  }, []);
+
+  const dataTable = {
+    columns,
+    rows,
+    title: "Lista de Usuários",
+  };
+
   return (
-    <>
-      <BasicTable dataTable={dataTable} />
-    </>
+    <div className="p-4 h-[calc(100vh-100px)]">
+      {loading ? (
+        <div className="flex items-center justify-center h-full">
+          <p className="text-gray-500">Carregando usuários...</p>
+        </div>
+      ) : (
+        <BasicTable
+          dataTable={dataTable}
+          onNewClick={() => {
+            setIsModalOpen(true);
+            console.log(isModalOpen);
+          }}
+          onEditClick={(id) => console.log("Editar ID:", id)}
+          onDeleteClick={(id) => console.log("Deletar ID:", id)}
+        />
+      )}
+
+      <UserMetaCard
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
+    </div>
   );
 }
