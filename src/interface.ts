@@ -10,7 +10,7 @@ export interface Row {
   id: number;
   name: string;
   nivel: string;
-  contato: string;
+  email: string;
   status: string;
 }
 

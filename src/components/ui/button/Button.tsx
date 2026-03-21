@@ -16,6 +16,7 @@ const variantClasses = {
 type ButtonVariant = keyof typeof variantClasses;
 
 type TooltipPosition = "top" | "right" | "bottom" | "left";
+type TypeButtom = "button" | "submit" | "reset";
 
 interface ButtonProps {
   children?: ReactNode;
@@ -30,6 +31,7 @@ interface ButtonProps {
   };
   disabled?: boolean;
   className?: string;
+  type?: TypeButtom;
 }
 
 const Button = ({
@@ -42,6 +44,7 @@ const Button = ({
   toolTip,
   className = "",
   disabled = false,
+  type,
 }: ButtonProps) => {
   const sizeClasses = {
     sm: "px-3 py-2.5 text-[18px]",
@@ -50,7 +53,7 @@ const Button = ({
 
   const btn = (
     <button
-      type="button"
+      type={`${type ? type : "button"}`}
       className={`inline-flex items-center justify-center gap-2 rounded-lg transition ${sizeClasses[size]} ${variantClasses[variant]} ${className} ${
         disabled ? "cursor-not-allowed opacity-50" : ""
       }`}

@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import BasicTable from "../../components/tables/BasicTable";
 import { Column, Row } from "../../interface";
-import UserMetaCard from "../../components/UserProfile/UserMetaCard";
+import { Modal } from "../../components/ui/modal";
+import UserForm from "../../modals/formUser";
 
 const columns: Column[] = [
   {
@@ -17,8 +18,8 @@ const columns: Column[] = [
   },
   {
     id: 3,
-    title: "Contato",
-    field: "contato",
+    title: "Email",
+    field: "email",
   },
   {
     id: 4,
@@ -32,6 +33,8 @@ export default function Users() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [selectedUser, setSelectedUser] = useState<any>(null);
 
   useEffect(() => {
     fetch("https://dummyjson.com/users?limit=100")
@@ -42,7 +45,7 @@ export default function Users() {
           id: u.id,
           name: `${u.firstName} ${u.lastName}`,
           nivel: `${u.id % 2 == 0 ? "Básico" : "Administrador"}`,
-          contato: u.email,
+          email: u.email,
           status: `${u.id % 2 != 0 ? "Ativo" : "Inativo"}`,
         }));
         setRows(mappedRows);
@@ -60,6 +63,19 @@ export default function Users() {
     title: "Lista de Usuários",
   };
 
+  // Função para abrir o modal para NOVO usuário
+  const handleNew = () => {
+    setSelectedUser(null); // Limpa o usuário selecionado
+    setIsModalOpen(true);
+  };
+
+  // Função para abrir o modal para EDITAR usuário
+  const handleEdit = (id: string | number) => {
+    const userToEdit = rows.find((r) => r.id === id);
+    setSelectedUser(userToEdit); // Define o usuário que será editado
+    setIsModalOpen(true);
+  };
+
   return (
     <div className="p-4 h-[calc(100vh-100px)]">
       {loading ? (
@@ -69,19 +85,22 @@ export default function Users() {
       ) : (
         <BasicTable
           dataTable={dataTable}
-          onNewClick={() => {
-            setIsModalOpen(true);
-            console.log(isModalOpen);
-          }}
-          onEditClick={(id) => console.log("Editar ID:", id)}
+          onNewClick={handleNew}
+          onEditClick={handleEdit}
           onDeleteClick={(id) => console.log("Deletar ID:", id)}
         />
       )}
 
-      <UserMetaCard
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <UserForm
+          user={selectedUser}
+          onCancel={() => setIsModalOpen(false)}
+          onSave={(data) => {
+            console.log("Dados a enviar para API:", data);
+            setIsModalOpen(false);
+          }}
+        />
+      </Modal>
     </div>
   );
 }
