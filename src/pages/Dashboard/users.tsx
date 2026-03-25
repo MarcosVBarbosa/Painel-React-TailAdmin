@@ -46,6 +46,8 @@ export default function Users() {
           name: `${u.firstName} ${u.lastName}`,
           nivel: `${u.id % 2 == 0 ? "Básico" : "Administrador"}`,
           email: u.email,
+          usuario: u.username,
+          departamento: u.company.department,
           status: `${u.id % 2 != 0 ? "Ativo" : "Inativo"}`,
         }));
         setRows(mappedRows);

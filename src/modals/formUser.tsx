@@ -7,8 +7,8 @@ import Switch from "../components/form/switch/Switch";
 interface UserFormData {
   id?: string | number;
   name: string;
-  email: string;
   departamento: string;
+  usuario: string;
   nivel: string;
   status: boolean;
 }
@@ -19,11 +19,42 @@ interface UserFormProps {
   onCancel: () => void;
 }
 
+function onGeraNameUsuario(name: string): string {
+  const ignorar = ["de", "da", "do", "dos", "das"];
+
+  const arrayName = name
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((n) => n.length > 0);
+
+  if (arrayName.length < 2) {
+    return "";
+  }
+
+  const firstName = arrayName[0];
+  const lastName = arrayName[arrayName.length - 1];
+
+  let abreviaName = "";
+
+  if (arrayName.length > 2) {
+    abreviaName = arrayName
+      .slice(1, -1)
+      .filter((n) => !ignorar.includes(n))
+      .map((n) => n[0])
+      .join("");
+  }
+
+  return abreviaName
+    ? `${firstName}.${abreviaName}${lastName}`
+    : `${firstName}.${lastName}`;
+}
+
 export default function UserForm({ user, onSave, onCancel }: UserFormProps) {
   const [formData, setFormData] = useState<UserFormData>({
     name: "",
-    email: "",
     departamento: "",
+    usuario: "",
     nivel: "",
     status: true,
   });
@@ -34,7 +65,6 @@ export default function UserForm({ user, onSave, onCancel }: UserFormProps) {
   ];
 
   useEffect(() => {
-    console.log(user);
     if (user) setFormData(user);
   }, [user]);
 
@@ -44,7 +74,7 @@ export default function UserForm({ user, onSave, onCancel }: UserFormProps) {
   };
 
   return (
-    <div className="w-full max-w-[700px] overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-gray-900">
+    <div className="w-full min-w-[500px] max-w-[700px] overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-gray-900">
       {/* Cabeçalho */}
       <div className="border-b border-gray-100 bg-gray-50/50 px-6 py-6 dark:border-gray-800 dark:bg-white/[0.02] lg:px-10">
         <h3 className="text-xl font-bold text-gray-800 dark:text-white">
@@ -59,57 +89,41 @@ export default function UserForm({ user, onSave, onCancel }: UserFormProps) {
         <div className="space-y-6">
           {/* Nome Completo */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div className="md:col-span-2">
+            <div className="md:col-span-6">
               <Label className="mb-2 block text-sm font-medium">
                 Nome Completo
               </Label>
               <Input
                 type="text"
-                placeholder="Ex: João Silva"
-                value={formData.name || ""}
+                value={formData.name}
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                className="w-full rounded-xl border-gray-200 bg-gray-50/30 focus:bg-white dark:border-gray-700 dark:bg-gray-800/50"
-              />
-            </div>
+                onBlur={(e) => {
+                  if (user) return;
 
-            {/* E-mail ocupando uma linha inteira */}
-            <div className="md:col-span-2">
-              <Label className="mb-2 block text-sm font-medium">
-                E-mail Corporativo
-              </Label>
-              <Input
-                type="email"
-                placeholder="joao@empresa.com"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-                className="w-full rounded-xl border-gray-200 bg-gray-50/30 focus:bg-white dark:border-gray-700 dark:bg-gray-800/50"
-              />
-            </div>
+                  const usuarioGerado = onGeraNameUsuario(e.target.value);
 
-            {/* Departamento e Nível Separados */}
-            <div>
-              <Label className="mb-2 block text-sm font-medium">
-                Departamento
-              </Label>
-              <Input
-                type="text"
-                placeholder="Selecione o departamento"
-                value={formData.departamento}
-                onChange={(e) =>
                   setFormData({
                     ...formData,
-                    departamento: e.target.value,
-                  })
-                }
+                    usuario: usuarioGerado,
+                  });
+                }}
                 className="w-full rounded-xl border-gray-200 bg-gray-50/30 focus:bg-white dark:border-gray-700 dark:bg-gray-800/50"
               />
             </div>
 
-            <div>
+            <div className="md:col-span-6">
+              <Label className="mb-2 block text-sm font-medium">Usuário</Label>
+              <Input
+                type="text"
+                disabled
+                value={formData.usuario}
+                className="w-full rounded-xl border-gray-200 bg-gray-50/30 dark:border-gray-700 dark:bg-gray-800/50"
+              />
+            </div>
+
+            <div className="md:col-span-6">
               <Label className="mb-2 block text-sm font-medium">
                 Nível de Acesso
               </Label>
@@ -123,29 +137,31 @@ export default function UserForm({ user, onSave, onCancel }: UserFormProps) {
             </div>
           </div>
 
-          {/* Switch de Status Integrado */}
-          <div className="pt-4 flex items-center justify-between p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50/30 dark:bg-white/[0.02]">
-            <div className="flex flex-col">
-              <span className="text-sm font-bold text-gray-800 dark:text-white">
-                Status da Conta
-              </span>
-              <span className="text-xs text-gray-500 dark:text-gray-400">
-                Ative ou desative o acesso do usuário
-              </span>
-            </div>
+          {/* Status */}
 
-            {/* O Switch agora recebe o estado corretamente */}
-            <Switch
-              label={formData.status ? "Ativo" : "Inativo"}
-              defaultChecked={formData.status}
-              onChange={(checked) =>
-                setFormData({ ...formData, status: checked })
-              }
-            />
-          </div>
+          {user && (
+            <div className="pt-4 flex items-center justify-between p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50/30 dark:bg-white/[0.02]">
+              <div className="flex flex-col">
+                <span className="text-sm font-bold text-gray-800 dark:text-white">
+                  Status da Conta
+                </span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  Ative ou desative o acesso do usuário
+                </span>
+              </div>
+
+              <Switch
+                label={formData.status ? "Ativo" : "Inativo"}
+                defaultChecked={formData.status}
+                onChange={(checked) =>
+                  setFormData({ ...formData, status: checked })
+                }
+              />
+            </div>
+          )}
         </div>
 
-        {/* Rodapé com Ações */}
+        {/* Ações */}
         <div className="mt-10 flex items-center justify-end gap-4 border-t border-gray-100 pt-8 dark:border-gray-800">
           <button
             type="button"
@@ -154,6 +170,7 @@ export default function UserForm({ user, onSave, onCancel }: UserFormProps) {
           >
             Cancelar
           </button>
+
           <button
             type="submit"
             className="rounded-xl bg-blue-600 px-8 py-3 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition-all hover:bg-blue-700 hover:shadow-blue-600/40 active:scale-95"
