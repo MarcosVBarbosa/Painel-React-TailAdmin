@@ -1,34 +1,58 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router";
+
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
+
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
+
 import Home from "./pages/Dashboard/Home";
-import NotFound from "./pages/OtherPage/NotFound";
 import Users from "./pages/Dashboard/users";
+import NotFound from "./pages/OtherPage/NotFound";
+
+import PrivateRoute from "./router/PrivateRoute";
+import PublicRoute from "./router/PublicRoute";
 
 export default function App() {
   return (
-    <>
-      <Router>
-        <ScrollToTop />
-        <Routes>
-          {/* Dashboard Layout */}
-          <Route element={<AppLayout />}>
-            <Route index path="/" element={<Home />} />
+    <Router>
+      <ScrollToTop />
 
-            {/* Others Page */}
-            <Route path="/users" element={<Users />} />
-          </Route>
+      <Routes>
+        {/* 🔐 ROTAS PROTEGIDAS */}
+        <Route
+          element={
+            <PrivateRoute>
+              <AppLayout />
+            </PrivateRoute>
+          }
+        >
+          <Route path="/" element={<Home />} />
+          <Route path="/users" element={<Users />} />
+        </Route>
 
-          {/* Auth Layout */}
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
+        {/* 🔓 ROTAS PÚBLICAS */}
+        <Route
+          path="/signin"
+          element={
+            <PublicRoute>
+              <SignIn />
+            </PublicRoute>
+          }
+        />
 
-          {/* Fallback Route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Router>
-    </>
+        <Route
+          path="/signup"
+          element={
+            <PublicRoute>
+              <SignUp />
+            </PublicRoute>
+          }
+        />
+
+        {/* ❌ NOT FOUND */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Router>
   );
 }

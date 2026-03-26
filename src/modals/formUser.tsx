@@ -3,21 +3,9 @@ import Input from "../components/form/input/InputField";
 import Label from "../components/form/Label";
 import Select from "../components/form/Select";
 import Switch from "../components/form/switch/Switch";
+import { UserFormData, UserFormProps } from "../interface";
 
-interface UserFormData {
-  id?: string | number;
-  name: string;
-  departamento: string;
-  usuario: string;
-  nivel: string;
-  status: boolean;
-}
 
-interface UserFormProps {
-  user?: UserFormData;
-  onSave: (data: UserFormData) => void;
-  onCancel: () => void;
-}
 
 function onGeraNameUsuario(name: string): string {
   const ignorar = ["de", "da", "do", "dos", "das"];

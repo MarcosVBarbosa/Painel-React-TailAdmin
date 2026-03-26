@@ -3,8 +3,10 @@ import { Outlet } from "react-router";
 import AppHeader from "./AppHeader";
 import Backdrop from "./Backdrop";
 import AppSidebar from "./AppSidebar";
+import { useActivity } from "../hooks/useActivity";
 
 const LayoutContent: React.FC = () => {
+  useActivity({ timeout: 1 * 60 * 1000 });
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
 
   return (

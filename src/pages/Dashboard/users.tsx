@@ -18,8 +18,8 @@ const columns: Column[] = [
   },
   {
     id: 3,
-    title: "Email",
-    field: "email",
+    title: "Usuário",
+    field: "usuario",
   },
   {
     id: 4,
@@ -45,7 +45,6 @@ export default function Users() {
           id: u.id,
           name: `${u.firstName} ${u.lastName}`,
           nivel: `${u.id % 2 == 0 ? "Básico" : "Administrador"}`,
-          email: u.email,
           usuario: u.username,
           departamento: u.company.department,
           status: `${u.id % 2 != 0 ? "Ativo" : "Inativo"}`,
