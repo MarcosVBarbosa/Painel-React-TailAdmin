@@ -91,7 +91,7 @@ export default function SignInForm() {
                   usuario: e.target.value.toLowerCase(),
                 })
               }
-              placeholder="ex: marcos.barbosa"
+              placeholder="ex: exemplo.exemplo"
               className={errors.usuario ? "border-red-500" : ""}
             />
 

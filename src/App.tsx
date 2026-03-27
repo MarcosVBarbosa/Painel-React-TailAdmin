@@ -1,17 +1,17 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router";
 
 import SignIn from "./pages/AuthPages/SignIn";
-import SignUp from "./pages/AuthPages/SignUp";
 
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 
 import Home from "./pages/Dashboard/Home";
-import Users from "./pages/Dashboard/users";
+import Users from "./pages/Dashboard/Users";
 import NotFound from "./pages/OtherPage/NotFound";
 
 import PrivateRoute from "./router/PrivateRoute";
 import PublicRoute from "./router/PublicRoute";
+import PermissionsUsers from "./pages/Dashboard/PermissionsUsers";
 
 export default function App() {
   return (
@@ -29,6 +29,7 @@ export default function App() {
         >
           <Route path="/" element={<Home />} />
           <Route path="/users" element={<Users />} />
+          <Route path="/permissionsusers" element={<PermissionsUsers />} />
         </Route>
 
         {/* 🔓 ROTAS PÚBLICAS */}
@@ -37,15 +38,6 @@ export default function App() {
           element={
             <PublicRoute>
               <SignIn />
-            </PublicRoute>
-          }
-        />
-
-        <Route
-          path="/signup"
-          element={
-            <PublicRoute>
-              <SignUp />
             </PublicRoute>
           }
         />

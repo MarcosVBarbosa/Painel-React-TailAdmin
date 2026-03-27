@@ -1,22 +1,14 @@
-export interface Column {
+export interface Column<T> {
   id: number;
   title: string;
-  field: keyof Row;
+  field: keyof T;
   style?: object;
   className?: string;
 }
 
-export interface Row {
-  id: number;
-  name: string;
-  nivel: string;
-  usuario: string;
-  status: string;
-}
-
-export interface DataTableBasic {
-  columns: Column[];
-  rows: Row[];
+export interface DataTableBasic<T> {
+  columns: Column<T>;
+  rows: T[];
   title: string;
   new?: boolean;
   edit?: boolean;
@@ -24,16 +16,21 @@ export interface DataTableBasic {
 }
 
 export interface UserFormData {
-  id?: string | number;
+  id: number;
   name: string;
-  departamento: string;
   usuario: string;
   nivel: string;
   status: boolean;
 }
 
-export interface UserFormProps {
-  user?: UserFormData;
-  onSave: (data: UserFormData) => void;
+export interface PermissionsUserFormData {
+  id: number;
+  name: string;
+  status: boolean;
+}
+
+export interface FormProps<T> {
+  data?: [];
+  onSave: (data: T) => void;
   onCancel: () => void;
 }
