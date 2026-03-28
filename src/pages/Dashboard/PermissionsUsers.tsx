@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import BasicTable from "../../components/tables/BasicTable";
 import { Column } from "../../interface";
 import { Modal } from "../../components/ui/modal";
-import UserForm from "../../modals/formUser";
+import PermissionsUserForm from "../../modals/FormPermissionsUser";
 
 export interface Row {
   id: number;
@@ -75,7 +75,7 @@ export default function PermissionsUsers() {
       )}
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <UserForm
+        <PermissionsUserForm
           data={selected}
           onCancel={() => setIsModalOpen(false)}
           onSave={(data) => {

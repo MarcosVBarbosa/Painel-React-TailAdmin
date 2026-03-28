@@ -29,8 +29,16 @@ export interface PermissionsUserFormData {
   status: boolean;
 }
 
-export interface FormProps<T> {
+export interface FormPropsCustom<T> {
   data?: [];
   onSave: (data: T) => void;
   onCancel: () => void;
+}
+
+export interface CardBasicProps {
+  headerContent?: React.ReactNode;
+  bodyContent?: React.ReactNode;
+  footerContent?: React.ReactNode;
+  onClose?: () => void;
+  className?: string;
 }
