@@ -2,14 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 import { ChevronDownIcon } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
-import { LayoutDashboard, Folder, FileText, Bell } from "lucide-react";
-
-export type NavItem = {
-  name: string;
-  icon: React.ReactNode;
-  path?: string;
-  subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
-};
+import { LayoutDashboard, Folder, Bell } from "lucide-react";
+import { NavItem } from "../interface";
 
 export const navItems: NavItem[] = [
   {
@@ -26,14 +20,9 @@ export const navItems: NavItem[] = [
     ],
   },
   {
-    icon: <FileText size={20} />,
-    name: "Relatórios",
-    path: "/reports",
-  },
-  {
     icon: <Bell size={20} />,
     name: "Notificações",
-    path: "/notifications",
+    path: "/Notifications",
   },
 ];
 

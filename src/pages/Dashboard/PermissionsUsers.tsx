@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import BasicTable from "../../components/tables/BasicTable";
-import { Column } from "../../interface";
+import { Column, PermissionActions } from "../../interface";
 import { Modal } from "../../components/ui/modal";
 import PermissionsUserForm from "../../modals/FormPermissionsUser";
 
 export interface Row {
   id: number;
   name: string;
+  permissions: Record<string, PermissionActions>;
   status: number;
 }
 
@@ -33,8 +34,48 @@ export default function PermissionsUsers() {
 
   useEffect(() => {
     const mappedRows: Row[] = [
-      { id: 1, name: "Admin", status: 1 },
-      { id: 2, name: "Basic", status: 1 },
+      {
+        id: 1,
+        name: "Admin",
+        permissions: {
+          dashboard: { view: true, create: true, edit: true, delete: true },
+          users: { view: true, create: true, edit: true, delete: true },
+          permissionsusers: {
+            view: true,
+            create: true,
+            edit: true,
+            delete: true,
+          },
+          Notifications: {
+            view: true,
+            create: true,
+            edit: true,
+            delete: true,
+          },
+        },
+        status: 1,
+      },
+      {
+        id: 2,
+        name: "Basic",
+        permissions: {
+          dashboard: { view: true, create: true, edit: true, delete: true },
+          users: { view: false, create: false, edit: false, delete: false },
+          permissionsusers: {
+            view: false,
+            create: false,
+            edit: false,
+            delete: false,
+          },
+          Notifications: {
+            view: false,
+            create: false,
+            edit: false,
+            delete: false,
+          },
+        },
+        status: 1,
+      },
     ];
     setRows(mappedRows);
     setLoading(false);

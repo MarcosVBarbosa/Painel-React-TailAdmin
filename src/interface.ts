@@ -23,10 +23,18 @@ export interface UserFormData {
   status: boolean;
 }
 
+export interface PermissionActions {
+  view: boolean;
+  create: boolean;
+  edit: boolean;
+  delete: boolean;
+}
+
 export interface PermissionsUserFormData {
   id: number;
   name: string;
-  status: boolean;
+  permissions: Record<string, PermissionActions>;
+  status: boolean | number;
 }
 
 export interface FormPropsCustom<T> {
@@ -42,3 +50,10 @@ export interface CardBasicProps {
   onClose?: () => void;
   className?: string;
 }
+
+export type NavItem = {
+  name: string;
+  icon: React.ReactNode;
+  path?: string;
+  subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
+};

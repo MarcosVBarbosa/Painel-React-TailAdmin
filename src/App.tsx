@@ -12,6 +12,7 @@ import NotFound from "./pages/OtherPage/NotFound";
 import PrivateRoute from "./router/PrivateRoute";
 import PublicRoute from "./router/PublicRoute";
 import PermissionsUsers from "./pages/Dashboard/PermissionsUsers";
+import Notifications from "./pages/Dashboard/Notifications";
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/users" element={<Users />} />
           <Route path="/permissionsusers" element={<PermissionsUsers />} />
+          <Route path="/Notifications" element={<Notifications />} />
         </Route>
 
         {/* 🔓 ROTAS PÚBLICAS */}

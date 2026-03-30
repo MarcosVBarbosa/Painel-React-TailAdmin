@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { FormPropsCustom, PermissionsUserFormData } from "../interface";
+import {
+  FormPropsCustom,
+  PermissionsUserFormData,
+  NavItem,
+} from "../interface";
 import { Eye, Plus, Edit3, Trash2 } from "lucide-react";
 import CardBasic from "../components/ui/card/CardBasic";
 import { navItems } from "../layout/AppSidebar";
@@ -33,7 +37,9 @@ const getGroupsFromNav = (items: NavItem[]): CategoryGroup[] => {
         title: item.name,
         hasSubItems: true,
         resources: item.subItems.map((sub) => ({
-          key: sub.path.replace(/^\//, "") || sub.name.toLowerCase().replace(/\s+/g, "_"),
+          key:
+            sub.path.replace(/^\//, "") ||
+            sub.name.toLowerCase().replace(/\s+/g, "_"),
           label: sub.name,
         })),
       });
@@ -44,7 +50,9 @@ const getGroupsFromNav = (items: NavItem[]): CategoryGroup[] => {
         hasSubItems: false,
         resources: [
           {
-            key: item.path.replace(/^\//, "") || item.name.toLowerCase().replace(/\s+/g, "_"),
+            key:
+              item.path.replace(/^\//, "") ||
+              item.name.toLowerCase().replace(/\s+/g, "_"),
             label: item.name,
           },
         ],
@@ -59,20 +67,15 @@ export default function PermissionsUserForm({
   data,
   onSave,
   onCancel,
-}: FormPropsCustom<PermissionsUserFormData> & {
-  onSave: (data: any) => void;
-  onCancel: () => void;
-}) {
+}: FormPropsCustom<PermissionsUserFormData>) {
   const groups = useMemo(() => getGroupsFromNav(navItems), []);
 
   const defaultFormData: PermissionsUserFormData = useMemo(
     () => ({
       id: 0,
       name: "",
-      usuario: "",
-      nivel: "",
-      status: true,
       permissions: {},
+      status: true,
     }),
     [],
   );
@@ -82,28 +85,49 @@ export default function PermissionsUserForm({
     groups.forEach((group) => {
       group.resources.forEach((res) => {
         if (!initialPermissions[res.key]) {
-          initialPermissions[res.key] = { view: false, create: false, edit: false, delete: false };
+          initialPermissions[res.key] = {
+            view: false,
+            create: false,
+            edit: false,
+            delete: false,
+          };
         }
       });
     });
-    return data ? { ...defaultFormData, ...data, permissions: initialPermissions } : { ...defaultFormData, permissions: initialPermissions };
+    return data
+      ? { ...defaultFormData, ...data, permissions: initialPermissions }
+      : { ...defaultFormData, permissions: initialPermissions };
   });
 
   useEffect(() => {
     if (data) {
+      console.log(data);
       const updatedPermissions = data.permissions || {};
       groups.forEach((group) => {
         group.resources.forEach((res) => {
           if (!updatedPermissions[res.key]) {
-            updatedPermissions[res.key] = { view: false, create: false, edit: false, delete: false };
+            updatedPermissions[res.key] = {
+              view: false,
+              create: false,
+              edit: false,
+              delete: false,
+            };
           }
         });
       });
-      setFormData({ ...defaultFormData, ...data, permissions: updatedPermissions });
+      setFormData({
+        ...defaultFormData,
+        ...data,
+        permissions: updatedPermissions,
+      });
     }
   }, [data, defaultFormData, groups]);
 
-  const handleTogglePermission = (resourceKey: string, action: string, checked: boolean) => {
+  const handleTogglePermission = (
+    resourceKey: string,
+    action: string,
+    checked: boolean,
+  ) => {
     setFormData((prev) => ({
       ...prev,
       permissions: {
@@ -155,18 +179,26 @@ export default function PermissionsUserForm({
                 {/* Grid Responsivo para Botões CRUD */}
                 <div className="grid grid-cols-2 xs:grid-cols-4 sm:flex sm:flex-wrap gap-2">
                   {CRUD_ACTIONS.map((action) => {
-                    const isActive = !!formData.permissions?.[resource.key]?.[action.key];
+                    const isActive =
+                      !!formData.permissions?.[resource.key]?.[action.key];
 
                     return (
                       <button
                         key={action.key}
                         type="button"
-                        onClick={() => handleTogglePermission(resource.key, action.key, !isActive)}
+                        onClick={() =>
+                          handleTogglePermission(
+                            resource.key,
+                            action.key,
+                            !isActive,
+                          )
+                        }
                         className={`
                           flex items-center justify-center gap-2 px-3 py-2 text-[11px] font-bold transition-all duration-200 rounded-xl border w-full sm:w-auto
-                          ${isActive 
-                            ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/10" 
-                            : "bg-white dark:bg-gray-900 text-gray-400 border-gray-100 dark:border-gray-800 hover:text-blue-600 hover:border-blue-100 dark:hover:border-blue-900/30"
+                          ${
+                            isActive
+                              ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/10"
+                              : "bg-white dark:bg-gray-900 text-gray-400 border-gray-100 dark:border-gray-800 hover:text-blue-600 hover:border-blue-100 dark:hover:border-blue-900/30"
                           }
                           active:scale-95
                         `}

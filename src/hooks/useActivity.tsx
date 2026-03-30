@@ -5,7 +5,7 @@ interface UseActivityProps {
   timeout?: number;
 }
 
-export function useActivity({ timeout = 15 * 60 * 1000 }: UseActivityProps) {
+export function useActivity({ timeout }: UseActivityProps) {
   const timerRef = useRef<number | null>(null);
 
   const resetTimer = useCallback(() => {

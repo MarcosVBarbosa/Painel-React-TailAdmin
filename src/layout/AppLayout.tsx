@@ -6,7 +6,7 @@ import AppSidebar from "./AppSidebar";
 import { useActivity } from "../hooks/useActivity";
 
 const LayoutContent: React.FC = () => {
-  useActivity({ timeout: 1 * 60 * 1000 });
+  useActivity({ timeout: 15 * 60 * 1000 });
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
 
   return (
