@@ -11,6 +11,14 @@ export interface Row {
   status: number;
 }
 
+export interface Rows {
+  id: number;
+  name: string;
+  permissions: object;
+  description: string;
+  status: boolean;
+}
+
 const columns: Column<Row>[] = [
   {
     id: 1,

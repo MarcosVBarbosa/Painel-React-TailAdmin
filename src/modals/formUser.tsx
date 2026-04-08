@@ -5,29 +5,14 @@ import Select from "../components/form/Select";
 import Switch from "../components/form/switch/Switch";
 import CardBasic from "../components/ui/card/CardBasic";
 import { FormPropsCustom, UserFormData } from "../interface";
+import { api } from "../services/api";
+import { Rows as RolesRows } from "../pages/Dashboard/PermissionsUsers";
+import { SetupUserName } from "../utils/SetupUserName";
 
-function onGeraNameUsuario(name: string): string {
-  const ignorar = ["de", "da", "do", "dos", "das"];
-  const arrayName = name
-    .trim()
-    .toLowerCase()
-    .split(/\s+/)
-    .filter((n) => n.length > 0);
-  if (arrayName.length < 2) return "";
-  const firstName = arrayName[0];
-  const lastName = arrayName[arrayName.length - 1];
-  let abreviaName = "";
-  if (arrayName.length > 2) {
-    abreviaName = arrayName
-      .slice(1, -1)
-      .filter((n) => !ignorar.includes(n))
-      .map((n) => n[0])
-      .join("");
-  }
-  return abreviaName
-    ? `${firstName}.${abreviaName}${lastName}`
-    : `${firstName}.${lastName}`;
-}
+type Option = {
+  value: string;
+  label: string;
+};
 
 export default function UserForm({
   data,
@@ -38,8 +23,8 @@ export default function UserForm({
     () => ({
       id: 0,
       name: "",
-      usuario: "",
-      nivel: "",
+      username: "",
+      role_id: "",
       status: true,
     }),
     [],
@@ -49,10 +34,23 @@ export default function UserForm({
     return data ? { ...defaultFormData, ...data } : defaultFormData;
   });
 
-  const nivelOptions = [
-    { value: "Básico", label: "Básico" },
-    { value: "Administrador", label: "Administrador" },
-  ];
+  const [rolesOptions, setRolesOptions] = useState<Option[]>([]);
+
+  useEffect(() => {
+    const fetchRoles = async () => {
+      const res = await api.get("/Roles/");
+      const response = res.data.data || [];
+
+      const mapped = response.map((item: RolesRows) => ({
+        value: String(item.id),
+        label: item.description,
+      }));
+
+      setRolesOptions(mapped);
+    };
+
+    fetchRoles();
+  }, []);
 
   useEffect(() => {
     if (data) setFormData({ ...defaultFormData, ...data });
@@ -89,7 +87,7 @@ export default function UserForm({
               setFormData((prev) => ({
                 ...prev,
                 name,
-                usuario: data ? prev.usuario : onGeraNameUsuario(name),
+                username: data ? prev.username : SetupUserName(name),
               }));
             }}
             className="w-full rounded-xl border-gray-100 bg-gray-50/30 focus:bg-white"
@@ -103,7 +101,7 @@ export default function UserForm({
           <Input
             type="text"
             disabled
-            value={formData.usuario}
+            value={formData.username}
             className="w-full rounded-xl border-gray-100 bg-gray-50/50"
           />
         </div>
@@ -113,10 +111,12 @@ export default function UserForm({
             Nível de Acesso
           </Label>
           <Select
-            options={nivelOptions}
-            value={formData.nivel}
+            options={rolesOptions}
+            value={formData.role_id}
             placeholder="Selecione o nível"
-            onChange={(val) => setFormData((prev) => ({ ...prev, nivel: val }))}
+            onChange={(val) =>
+              setFormData((prev) => ({ ...prev, role_id: val }))
+            }
             className="w-full rounded-xl border-gray-100 bg-gray-50/30"
           />
         </div>
@@ -169,7 +169,7 @@ export default function UserForm({
       headerContent={headerContent}
       bodyContent={bodyContent}
       footerContent={footerContent}
-      className="min-w-[500px] max-w-[700px]" 
+      className="min-w-[500px] max-w-[700px]"
     />
   );
 }

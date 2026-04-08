@@ -25,6 +25,8 @@ const Select: React.FC<SelectProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
+  options = [{ value: "0", label: "Selecione um nível" }, ...options];
+
   // O estado interno agora prioriza o valor que vem de fora (externalValue)
   const [internalValue, setInternalValue] = useState<string>(defaultValue);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -34,7 +36,6 @@ const Select: React.FC<SelectProps> = ({
     externalValue !== undefined ? externalValue : internalValue;
 
   useEffect(() => {
-    console.log(currentValue);
     const handleClickOutside = (event: MouseEvent) => {
       if (
         containerRef.current &&
@@ -43,6 +44,7 @@ const Select: React.FC<SelectProps> = ({
         setIsOpen(false);
       }
     };
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -53,9 +55,7 @@ const Select: React.FC<SelectProps> = ({
     setIsOpen(false);
   };
 
-  const selectedLabel = options.find(
-    (opt) => opt.value === currentValue,
-  )?.label;
+  const selectedLabel = options.find((opt) => opt.value == currentValue)?.label;
 
   return (
     <div className={`relative w-full ${className}`} ref={containerRef}>

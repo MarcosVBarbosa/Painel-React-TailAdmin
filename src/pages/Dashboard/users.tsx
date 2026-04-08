@@ -4,12 +4,14 @@ import { Column } from "../../interface";
 import { Modal } from "../../components/ui/modal";
 import UserForm from "../../modals/formUser";
 import { api } from "../../services/api";
+import { Rows as RolesRows } from "./PermissionsUsers";
 
 export interface Row {
   id: number;
   name: string;
-  nivel: string;
-  usuario: string;
+  roles: RolesRows;
+  role_id: number;
+  username: string;
   status: string;
 }
 
@@ -22,13 +24,13 @@ const columns: Column<Row>[] = [
   {
     id: 2,
     title: "Nivel",
-    field: "nivel",
+    field: "roles",
     className: "w-20",
   },
   {
     id: 3,
     title: "Usuário",
-    field: "usuario",
+    field: "username",
   },
   {
     id: 4,
@@ -46,18 +48,22 @@ export default function Users() {
   const [selected, setselected] = useState<any>(null);
 
   async function getUsers() {
-    try {
-      const response = await api.get("/Users/?roles=true");
-      setRows(response.data.data);
-      setLoading(false);
-    } catch (error) {
-      console.error("Erro ao carregar usuários:", error);
-      setLoading(false);
-    }
+    return (await api.get("/Users/?includelist=role")).data.data;
   }
 
   useEffect(() => {
-    getUsers();
+    getUsers().then((rows) => {
+      const mapRows = rows.map((row: Row) => ({
+        id: row.id,
+        name: row.name,
+        username: row.username,
+        role_id: row.role_id,
+        roles: row.roles.description,
+        status: row.status ? "Ativos" : "Inativos",
+      }));
+      setRows(mapRows);
+      setLoading(false);
+    });
   }, []);
 
   const dataTable = {
@@ -75,6 +81,7 @@ export default function Users() {
   // Função para abrir o modal para EDITAR usuário
   const handleEdit = (id: string | number) => {
     const userToEdit = rows.find((r) => r.id === id);
+    console.log(userToEdit);
     setselected(userToEdit); // Define o usuário que será editado
     setIsModalOpen(true);
   };

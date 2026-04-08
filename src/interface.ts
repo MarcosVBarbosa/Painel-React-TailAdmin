@@ -18,8 +18,8 @@ export interface DataTableBasic<T> {
 export interface UserFormData {
   id: number;
   name: string;
-  usuario: string;
-  nivel: string;
+  username: string;
+  role_id: string;
   status: boolean;
 }
 
