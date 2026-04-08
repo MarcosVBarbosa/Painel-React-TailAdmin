@@ -1,52 +1,50 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
-
-import { EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
-import Checkbox from "../form/input/Checkbox";
+// import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
-
-import { login } from "../../utils/auth";
-
-// valida formato
-function isValidUsername(username: string): boolean {
-  const regex = /^[a-z]+\.([a-z]+|[a-z][a-z]+[0-9]*)$/;
-  return regex.test(username);
-}
+import { login, isAuthenticated } from "../../utils/auth";
+import axios from "axios";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function SignInForm() {
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
-  const [isChecked, setIsChecked] = useState(false);
+  // const [isChecked, setIsChecked] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [formData, setFormData] = useState({
-    usuario: "",
-    senha: "",
+    username: "",
+    password: "",
   });
 
   const [errors, setErrors] = useState({
-    usuario: "",
-    senha: "",
+    username: "",
+    password: "",
+    general: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (isAuthenticated()) {
+      navigate("/");
+    }
+  }, [navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     let hasError = false;
-    const newErrors = { usuario: "", senha: "" };
+    const newErrors = { username: "", password: "", general: "" };
 
-    if (!formData.usuario) {
-      newErrors.usuario = "Informe o usuário";
-      hasError = true;
-    } else if (!isValidUsername(formData.usuario)) {
-      newErrors.usuario = "Formato inválido";
+    if (!formData.username.trim()) {
+      newErrors.username = "Informe o usuário";
       hasError = true;
     }
 
-    if (!formData.senha) {
-      newErrors.senha = "Informe a senha";
+    if (!formData.password) {
+      newErrors.password = "Informe a senha";
       hasError = true;
     }
 
@@ -54,16 +52,42 @@ export default function SignInForm() {
 
     if (hasError) return;
 
-    // 🔥 LOGIN FAKE
-    login({
-      nome: "Marcos Barbosa",
-      usuario: formData.usuario,
-      nivel: "Administrador",
-      avatar: "",
-    });
+    setIsLoading(true);
+    setErrors((prev) => ({ ...prev, general: "" }));
 
-    // 🔥 REDIRECT
-    navigate("/");
+    try {
+      const result = await login({
+        username: formData.username.toLowerCase(),
+        password: formData.password,
+      });
+
+      console.log(result);
+
+      // if (isChecked) {
+      //   localStorage.setItem("keepConnected", "true");
+      // }
+
+      navigate("/");
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.data?.error) {
+        setErrors((prev) => ({
+          ...prev,
+          general: error.response?.data?.error,
+        }));
+      } else if (error instanceof Error) {
+        setErrors((prev) => ({
+          ...prev,
+          general: error.message,
+        }));
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          general: "Erro ao fazer login",
+        }));
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -79,65 +103,82 @@ export default function SignInForm() {
 
       <form onSubmit={handleSubmit}>
         <div className="space-y-6">
-          {/* Usuário */}
+          {errors.general && (
+            <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+              <p className="text-sm text-red-600 dark:text-red-400">
+                {errors.general}
+              </p>
+            </div>
+          )}
+
           <div>
             <Label className="text-gray-800 dark:text-white">Usuário *</Label>
-
             <Input
-              value={formData.usuario}
+              value={formData.username}
               onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  usuario: e.target.value.toLowerCase(),
-                })
+                setFormData({ ...formData, username: e.target.value })
               }
-              placeholder="ex: exemplo.exemplo"
-              className={errors.usuario ? "border-red-500" : ""}
+              placeholder="Digite seu username"
+              error={!!errors.username}
+              disabled={isLoading}
+              autoComplete="username"
             />
-
-            {errors.usuario && (
-              <p className="text-sm text-red-500">{errors.usuario}</p>
+            {errors.username && (
+              <p className="text-sm text-red-500 mt-1">{errors.username}</p>
             )}
           </div>
 
-          {/* Senha */}
           <div>
             <Label className="text-gray-800 dark:text-white">Senha *</Label>
-
             <div className="relative">
               <Input
                 type={showPassword ? "text" : "password"}
-                value={formData.senha}
+                value={formData.password}
                 onChange={(e) =>
-                  setFormData({ ...formData, senha: e.target.value })
+                  setFormData({ ...formData, password: e.target.value })
                 }
-                className={errors.senha ? "border-red-500" : ""}
+                error={!!errors.password}
+                disabled={isLoading}
+                placeholder="Digite sua senha"
+                autoComplete="current-password"
               />
-
               <span
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer"
+                className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer opacity-50"
               >
-                {showPassword ? <EyeIcon /> : <EyeCloseIcon />}
+                {showPassword ? <Eye /> : <EyeOff />}
               </span>
             </div>
-
-            {errors.senha && (
-              <p className="text-sm text-red-500">{errors.senha}</p>
+            {errors.password && (
+              <p className="text-sm text-red-500 mt-1">{errors.password}</p>
             )}
           </div>
 
-          {/* Opção */}
-          <div className="flex items-center gap-3">
-            <Checkbox checked={isChecked} onChange={setIsChecked} />
+          {/* <div className="flex items-center gap-3">
+            <Checkbox
+              checked={isChecked}
+              onChange={setIsChecked}
+              disabled={isLoading}
+            />
             <span className="text-sm text-gray-700 dark:text-gray-400">
               Manter conectado
             </span>
-          </div>
+          </div> */}
 
-          {/* Botão */}
-          <Button type="submit" className="w-full" size="sm">
-            Entrar
+          <Button
+            type="submit"
+            className="w-full"
+            size="sm"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Entrando...
+              </div>
+            ) : (
+              "Entrar"
+            )}
           </Button>
         </div>
       </form>

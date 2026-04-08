@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import BasicTable from "../../components/tables/BasicTable";
+import BasicTable from "../../components/tables/basicTable";
 import { Column } from "../../interface";
 import { Modal } from "../../components/ui/modal";
 import UserForm from "../../modals/formUser";

@@ -9,7 +9,6 @@ import { UserFormData } from "../interface";
 const user: UserFormData = {
   id: 1,
   name: "Marcos Vinicius Barbosa",
-  departamento: "Desenvolvimento de sistema",
   usuario: "marcos.vbarbosa",
   nivel: "Administrador",
   status: true,
