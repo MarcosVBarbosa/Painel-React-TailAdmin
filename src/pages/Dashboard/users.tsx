@@ -3,6 +3,7 @@ import BasicTable from "../../components/tables/basicTable";
 import { Column } from "../../interface";
 import { Modal } from "../../components/ui/modal";
 import UserForm from "../../modals/formUser";
+import { api } from "../../services/api";
 
 export interface Row {
   id: number;
@@ -44,26 +45,19 @@ export default function Users() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selected, setselected] = useState<any>(null);
 
+  async function getUsers() {
+    try {
+      const response = await api.get("/Users/?roles=true");
+      setRows(response.data.data);
+      setLoading(false);
+    } catch (error) {
+      console.error("Erro ao carregar usuários:", error);
+      setLoading(false);
+    }
+  }
+
   useEffect(() => {
-    fetch("https://dummyjson.com/users?limit=100")
-      .then((res) => res.json())
-      .then((data) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const mappedRows = data.users.map((u: any) => ({
-          id: u.id,
-          name: `${u.firstName} ${u.lastName}`,
-          nivel: `${u.id % 2 == 0 ? "Básico" : "Administrador"}`,
-          usuario: u.username,
-          departamento: u.company.department,
-          status: `${u.id % 2 != 0 ? "Ativo" : "Inativo"}`,
-        }));
-        setRows(mappedRows);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Erro ao carregar usuários:", err);
-        setLoading(false);
-      });
+    getUsers();
   }, []);
 
   const dataTable = {
