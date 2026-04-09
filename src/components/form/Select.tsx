@@ -25,8 +25,6 @@ const Select: React.FC<SelectProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  options = [{ value: "0", label: "Selecione um nível" }, ...options];
-
   // O estado interno agora prioriza o valor que vem de fora (externalValue)
   const [internalValue, setInternalValue] = useState<string>(defaultValue);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -75,7 +73,7 @@ const Select: React.FC<SelectProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 mt-2 w-full overflow-hidden rounded-xl border border-gray-100 bg-white p-1 shadow-xl animate-in fade-in zoom-in duration-200 dark:border-gray-800 dark:bg-gray-900">
+        <div className="absolute z-[9999] mt-2 w-full  overflow-hidden rounded-xl border border-gray-100 bg-white p-1 shadow-xl animate-in fade-in zoom-in duration-200 dark:border-gray-800 dark:bg-gray-900">
           <div className="max-h-60 overflow-y-auto custom-scrollbar">
             {options.map((option) => (
               <button
@@ -88,7 +86,7 @@ const Select: React.FC<SelectProps> = ({
                     : "text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-white/[0.03]"
                 }`}
               >
-                {option.label}
+                {option.label || "teste"}
               </button>
             ))}
           </div>

@@ -74,7 +74,13 @@ export default function Users() {
 
   // Função para abrir o modal para NOVO usuário
   const handleNew = () => {
-    setselected(null); // Limpa o usuário selecionado
+    setselected({
+      id: 0,
+      name: "",
+      username: "",
+      role_id: "",
+      status: true,
+    }); // Limpa o usuário selecionado
     setIsModalOpen(true);
   };
 

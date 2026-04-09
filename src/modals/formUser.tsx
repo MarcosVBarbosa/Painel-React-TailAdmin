@@ -35,6 +35,9 @@ export default function UserForm({
   });
 
   const [rolesOptions, setRolesOptions] = useState<Option[]>([]);
+  const [usernameError, setUsernameError] = useState<string | null>(null);
+
+  const method = data?.id === 0 ? "POST" : "PUT";
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -84,16 +87,35 @@ export default function UserForm({
             value={formData.name}
             onChange={(e) => {
               const name = e.target.value;
-              setFormData((prev) => ({
-                ...prev,
-                name,
-                username: data ? prev.username : SetupUserName(name),
-              }));
+
+              const result = SetupUserName(name);
+
+              if (typeof result === "object" && "erro" in result) {
+                setUsernameError(result.erro);
+
+                setFormData((prev) => ({
+                  ...prev,
+                  name,
+                  username: "", // limpa username inválido
+                }));
+              } else {
+                setUsernameError(null);
+
+                setFormData((prev) => ({
+                  ...prev,
+                  name,
+                  username: data?.id === 0 ? result : prev.username,
+                }));
+              }
             }}
             className="w-full rounded-xl border-gray-100 bg-gray-50/30 focus:bg-white"
           />
         </div>
-
+        {usernameError && (
+          <span className="text-xs text-red-500 mt-1 block">
+            {usernameError}
+          </span>
+        )}
         <div>
           <Label className="mb-1.5 block text-[13px] font-bold text-gray-700">
             Usuário
