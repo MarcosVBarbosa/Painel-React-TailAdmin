@@ -1,10 +1,5 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
-import {
-  getAccessToken,
-  getRefreshToken,
-  setTokens,
-  logout,
-} from "../utils/auth";
+import { getAccessToken, setTokens, logout } from "../utils/auth";
 
 interface QueuedRequest {
   resolve: (value?: unknown) => void;
@@ -21,22 +16,24 @@ export const api = axios.create({
     "Content-Type": "application/json",
   },
   timeout: 30000,
+  withCredentials: true,
 });
 
-// Interceptor para adicionar token
+// 🔹 Interceptor de request (adiciona access_token)
 api.interceptors.request.use(
   (config): CustomAxiosRequestConfig => {
     const token = getAccessToken();
+
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
     return config as CustomAxiosRequestConfig;
   },
-  (error: AxiosError) => {
-    return Promise.reject(error);
-  },
+  (error: AxiosError) => Promise.reject(error),
 );
 
+// 🔹 Controle de fila de requests durante refresh
 let isRefreshing = false;
 let failedQueue: QueuedRequest[] = [];
 
@@ -48,10 +45,11 @@ const processQueue = (error: Error | null, token: string | null = null) => {
       prom.resolve(token);
     }
   });
+
   failedQueue = [];
 };
 
-// Interceptor para tratar token expirado
+// 🔹 Interceptor de response (refresh token automático)
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
@@ -61,7 +59,7 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // ⚠️ NÃO tentar refresh nas rotas de autenticação
+    // ❌ NÃO tentar refresh em rotas de auth
     const isAuthRoute =
       originalRequest.url === "/sessions" ||
       originalRequest.url === "/sessions/refresh" ||
@@ -71,13 +69,14 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Se não for erro 401 ou já tentou refresh, rejeita
+    // ❌ se não for 401 ou já tentou, rejeita
     if (error.response?.status !== 401 || originalRequest._retry) {
       return Promise.reject(error);
     }
 
     originalRequest._retry = true;
 
+    // 🔁 Se já está atualizando token → entra na fila
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
         failedQueue.push({ resolve, reject });
@@ -89,29 +88,27 @@ api.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      const refresh_token = getRefreshToken();
+      // 🔥 refresh usando cookie httpOnly (sem enviar body)
+      const response = await api.post("/sessions/refresh");
 
-      if (!refresh_token) {
-        throw new Error("Refresh token não encontrado");
-      }
+      const { access_token } = response.data;
 
-      const response = await api.post("/sessions/refresh", {
-        refresh_token,
-      });
+      // 🔐 salva apenas access_token
+      setTokens(access_token);
 
-      const { access_token, refresh_token: new_refresh_token } = response.data;
-
-      setTokens(access_token, new_refresh_token || refresh_token);
-
+      // 🔄 atualiza header da request original
       if (originalRequest.headers) {
-        originalRequest.headers["Authorization"] = `Bearer ${access_token}`;
+        originalRequest.headers.Authorization = `Bearer ${access_token}`;
       }
 
+      // 🔓 libera fila
       processQueue(null, access_token);
 
       return api(originalRequest);
     } catch (refreshError) {
       processQueue(refreshError as Error, null);
+
+      // 🔴 logout total
       await logout();
 
       if (window.location.pathname !== "/signin") {

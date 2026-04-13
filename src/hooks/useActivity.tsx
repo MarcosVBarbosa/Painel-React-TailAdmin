@@ -1,26 +1,39 @@
 import { useEffect, useRef, useCallback } from "react";
-import { logout } from "../utils/auth";
+import { logout, updateActivity, getAccessToken } from "../utils/auth";
 
 interface UseActivityProps {
   timeout?: number;
 }
 
-export function useActivity({ timeout }: UseActivityProps) {
+export function useActivity({ timeout = 15 * 60 * 1000 }: UseActivityProps) {
   const timerRef = useRef<number | null>(null);
 
   const resetTimer = useCallback(() => {
-    if (timerRef.current) {
+    const token = getAccessToken();
+
+    if (!token) return;
+
+    if (timerRef.current !== null) {
       clearTimeout(timerRef.current);
     }
 
+    updateActivity();
+
     timerRef.current = window.setTimeout(() => {
-      console.log("Usuário inativo → logout automático");
-      logout();
-      window.location.href = "/signin";
+      const stillHasToken = getAccessToken();
+
+      if (stillHasToken) {
+        logout();
+        window.location.href = "/signin";
+      }
     }, timeout);
   }, [timeout]);
 
   useEffect(() => {
+    const token = getAccessToken();
+
+    if (!token) return;
+
     const events = ["mousemove", "keydown", "click", "scroll"];
 
     events.forEach((event) => {
@@ -34,7 +47,7 @@ export function useActivity({ timeout }: UseActivityProps) {
         window.removeEventListener(event, resetTimer);
       });
 
-      if (timerRef.current) {
+      if (timerRef.current !== null) {
         clearTimeout(timerRef.current);
       }
     };

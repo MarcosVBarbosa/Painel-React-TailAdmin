@@ -1,19 +1,24 @@
 import { useState, useEffect } from "react";
 import BasicTable from "../../components/tables/basicTable";
-import { Column } from "../../interface";
+import { Column, UserFormData } from "../../interface";
 import { Modal } from "../../components/ui/modal";
-import UserForm from "../../modals/formUser";
+import UserForm from "../../modals/FormUser";
 import { api } from "../../services/api";
-import { Rows as RolesRows } from "./PermissionsUsers";
+import { Rows as RolesRows } from "./RolesUsers";
 
 export interface Row {
   id: number;
   name: string;
-  roles: RolesRows;
+  roles: string; // ✅ corrigido
   role_id: number;
   username: string;
   status: string;
 }
+
+type RoleOption = {
+  value: string;
+  label: string;
+};
 
 const columns: Column<Row>[] = [
   {
@@ -32,38 +37,66 @@ const columns: Column<Row>[] = [
     title: "Usuário",
     field: "username",
   },
-  {
-    id: 4,
-    title: "Status",
-    field: "status",
-    className: "w-20",
-  },
 ];
+
+const UserFormDataClear: UserFormData = {
+  id: 0,
+  name: "",
+  username: "",
+  password: "",
+  role_id: "",
+  status: true,
+};
 
 export default function Users() {
   const [rows, setRows] = useState<Row[]>([]);
+  const [rolesOptions, setRolesOptions] = useState<RoleOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [selected, setselected] = useState<any>(null);
+  const [selected, setSelected] = useState<UserFormData | null>(null);
 
+  // 🔽 carregar usuários
   async function getUsers() {
-    return (await api.get("/Users/?includelist=role")).data.data;
-  }
+    try {
+      const response = (await api.get("/Users/?includelist=role")).data.data;
 
-  useEffect(() => {
-    getUsers().then((rows) => {
-      const mapRows = rows.map((row: Row) => ({
+      const mapRows = response.map((row: any) => ({
         id: row.id,
         name: row.name,
         username: row.username,
         role_id: row.role_id,
-        roles: row.roles.description,
-        status: row.status ? "Ativos" : "Inativos",
+        roles: row.roles?.description || "",
+        status: row.status ? "Ativo" : "Inativo",
       }));
+
       setRows(mapRows);
+    } catch (error) {
+      console.error(error);
+    } finally {
       setLoading(false);
-    });
+    }
+  }
+
+  // 🔽 carregar roles
+  async function getRoles() {
+    try {
+      const res = await api.get("/Roles/");
+      const response = res.data.data || [];
+
+      const mapped = response.map((item: RolesRows) => ({
+        value: String(item.id),
+        label: item.description,
+      }));
+
+      setRolesOptions(mapped);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  useEffect(() => {
+    getUsers();
+    getRoles();
   }, []);
 
   const dataTable = {
@@ -72,23 +105,28 @@ export default function Users() {
     title: "Lista de Usuários",
   };
 
-  // Função para abrir o modal para NOVO usuário
+  // 🔽 novo usuário
   const handleNew = () => {
-    setselected({
-      id: 0,
-      name: "",
-      username: "",
-      role_id: "",
-      status: true,
-    }); // Limpa o usuário selecionado
+    setSelected(UserFormDataClear);
     setIsModalOpen(true);
   };
 
-  // Função para abrir o modal para EDITAR usuário
+  // 🔽 editar usuário
   const handleEdit = (id: string | number) => {
-    const userToEdit = rows.find((r) => r.id === id);
-    console.log(userToEdit);
-    setselected(userToEdit); // Define o usuário que será editado
+    const userToEdit = rows.find((r) => r.id === Number(id));
+
+    if (!userToEdit) return;
+
+    // 🔥 converte Row → UserFormData
+    setSelected({
+      id: userToEdit.id,
+      name: userToEdit.name,
+      username: userToEdit.username,
+      password: "",
+      role_id: String(userToEdit.role_id),
+      status: userToEdit.status === "Ativo",
+    });
+
     setIsModalOpen(true);
   };
 
@@ -112,7 +150,27 @@ export default function Users() {
           data={selected}
           onCancel={() => setIsModalOpen(false)}
           onSave={(data) => {
-            console.log("Dados a enviar para API:", data);
+            setRows((prev) => {
+              const role = rolesOptions.find((r) => r.value === data.role_id);
+
+              const newRow: Row = {
+                id: data.id || Date.now(),
+                name: data.name,
+                username: data.username,
+                role_id: Number(data.role_id),
+                roles: role?.label || "",
+                status: data.status ? "Ativo" : "Inativo",
+              };
+
+              const exists = prev.some((r) => r.id === newRow.id);
+
+              if (exists) {
+                return prev.map((r) => (r.id === newRow.id ? newRow : r));
+              }
+
+              return [newRow, ...prev];
+            });
+
             setIsModalOpen(false);
           }}
         />

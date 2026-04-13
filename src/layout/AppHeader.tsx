@@ -4,19 +4,34 @@ import { useSidebar } from "../context/SidebarContext";
 import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
 import NotificationDropdown from "../components/header/NotificationDropdown";
 import UserDropdown from "../components/header/UserDropdown";
-import { UserFormData } from "../interface";
+import { getUser } from "../utils/auth";
 
-const user: UserFormData = {
-  id: 1,
-  name: "Marcos Vinicius Barbosa",
-  usuario: "marcos.vbarbosa",
-  nivel: "Administrador",
-  status: true,
-};
+interface UserData {
+  id: number;
+  name: string;
+  username: string;
+  rolename?: string | null;
+  status: boolean;
+}
+
 const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
 
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
+
+  // 🔥 usuário real vindo do auth
+  const authUser = getUser();
+
+  // 🔥 mapeia para o formato esperado pelo UserDropdown
+  const user: UserData | null = authUser
+    ? {
+        id: authUser.id,
+        name: authUser.name,
+        username: authUser.username,
+        rolename: authUser.role?.name || "Usuário",
+        status: authUser.status,
+      }
+    : null;
 
   const handleToggle = () => {
     if (window.innerWidth >= 1024) {
@@ -98,7 +113,8 @@ const AppHeader: React.FC = () => {
             <NotificationDropdown />
           </div>
 
-          <UserDropdown user={user} />
+          {/* 🔥 só renderiza se tiver usuário */}
+          {user && <UserDropdown user={user} />}
         </div>
       </div>
     </header>

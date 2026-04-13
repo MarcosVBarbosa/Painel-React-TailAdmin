@@ -19,7 +19,9 @@ export interface UserFormData {
   id: number;
   name: string;
   username: string;
+  password: string;
   role_id: string;
+  rolename?: string | null;
   status: boolean;
 }
 
@@ -30,10 +32,10 @@ export interface PermissionActions {
   delete: boolean;
 }
 
-export interface PermissionsUserFormData {
+export interface FormRolesUserData {
   id: number;
   name: string;
-  permissions: Record<string, PermissionActions>;
+  crud: Record<string, PermissionActions>;
   status: boolean | number;
 }
 

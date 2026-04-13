@@ -11,7 +11,7 @@ import NotFound from "./pages/OtherPage/NotFound";
 
 import PrivateRoute from "./router/PrivateRoute";
 import PublicRoute from "./router/PublicRoute";
-import PermissionsUsers from "./pages/Dashboard/PermissionsUsers";
+import PermissionsUsers from "./pages/Dashboard/RolesUsers";
 import Notifications from "./pages/Dashboard/Notifications";
 
 export default function App() {
@@ -20,6 +20,16 @@ export default function App() {
       <ScrollToTop />
 
       <Routes>
+        {/* 🔓 ROTAS PÚBLICAS */}
+        <Route
+          path="/signin"
+          element={
+            <PublicRoute>
+              <SignIn />
+            </PublicRoute>
+          }
+        />
+
         {/* 🔐 ROTAS PROTEGIDAS */}
         <Route
           element={
@@ -31,18 +41,8 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/users" element={<Users />} />
           <Route path="/permissionsusers" element={<PermissionsUsers />} />
-          <Route path="/Notifications" element={<Notifications />} />
+          <Route path="/notifications" element={<Notifications />} />
         </Route>
-
-        {/* 🔓 ROTAS PÚBLICAS */}
-        <Route
-          path="/signin"
-          element={
-            <PublicRoute>
-              <SignIn />
-            </PublicRoute>
-          }
-        />
 
         {/* ❌ NOT FOUND */}
         <Route path="*" element={<NotFound />} />

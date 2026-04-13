@@ -2,17 +2,21 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
-// import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
 import { login, isAuthenticated } from "../../utils/auth";
 import axios from "axios";
 import { Eye, EyeOff } from "lucide-react";
 
+interface FormErrors {
+  username: string;
+  password: string;
+  general: string;
+}
+
 export default function SignInForm() {
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
-  // const [isChecked, setIsChecked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -20,12 +24,13 @@ export default function SignInForm() {
     password: "",
   });
 
-  const [errors, setErrors] = useState({
+  const [errors, setErrors] = useState<FormErrors>({
     username: "",
     password: "",
     general: "",
   });
 
+  // ✅ Redireciona apenas se já estiver autenticado
   useEffect(() => {
     if (isAuthenticated()) {
       navigate("/");
@@ -36,7 +41,11 @@ export default function SignInForm() {
     e.preventDefault();
 
     let hasError = false;
-    const newErrors = { username: "", password: "", general: "" };
+    const newErrors: FormErrors = {
+      username: "",
+      password: "",
+      general: "",
+    };
 
     if (!formData.username.trim()) {
       newErrors.username = "Informe o usuário";
@@ -56,23 +65,30 @@ export default function SignInForm() {
     setErrors((prev) => ({ ...prev, general: "" }));
 
     try {
-      const result = await login({
+      const user = await login({
         username: formData.username.toLowerCase(),
         password: formData.password,
       });
 
-      console.log(result);
-
-      // if (isChecked) {
-      //   localStorage.setItem("keepConnected", "true");
-      // }
+      if (!user.status) {
+        setErrors((prev) => ({
+          ...prev,
+          general: "Usuário inativo. Contate o administrador.",
+        }));
+        return;
+      }
 
       navigate("/");
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.data?.error) {
+      if (axios.isAxiosError(error)) {
+        const message =
+          error.response?.data?.error ||
+          error.response?.data?.message ||
+          error.message;
+
         setErrors((prev) => ({
           ...prev,
-          general: error.response?.data?.error,
+          general: message,
         }));
       } else if (error instanceof Error) {
         setErrors((prev) => ({
@@ -111,6 +127,7 @@ export default function SignInForm() {
             </div>
           )}
 
+          {/* USERNAME */}
           <div>
             <Label className="text-gray-800 dark:text-white">Usuário *</Label>
             <Input
@@ -128,6 +145,7 @@ export default function SignInForm() {
             )}
           </div>
 
+          {/* PASSWORD */}
           <div>
             <Label className="text-gray-800 dark:text-white">Senha *</Label>
             <div className="relative">
@@ -154,17 +172,7 @@ export default function SignInForm() {
             )}
           </div>
 
-          {/* <div className="flex items-center gap-3">
-            <Checkbox
-              checked={isChecked}
-              onChange={setIsChecked}
-              disabled={isLoading}
-            />
-            <span className="text-sm text-gray-700 dark:text-gray-400">
-              Manter conectado
-            </span>
-          </div> */}
-
+          {/* SUBMIT */}
           <Button
             type="submit"
             className="w-full"

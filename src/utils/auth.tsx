@@ -15,7 +15,6 @@ export interface AuthUser {
 
 interface AuthStorage {
   access_token: string;
-  refresh_token: string;
   user: AuthUser;
   lastActivity: number;
 }
@@ -28,7 +27,6 @@ interface LoginCredentials {
 interface LoginResponse {
   user: AuthUser;
   access_token: string;
-  refresh_token: string;
 }
 
 const STORAGE_KEY = "auth";
@@ -41,48 +39,46 @@ export async function login(credentials: LoginCredentials): Promise<AuthUser> {
     password: credentials.password,
   });
 
-  const { access_token, refresh_token, user } = response.data;
+  const { access_token, user } = response.data;
 
   const authData: AuthStorage = {
     access_token,
-    refresh_token,
     user,
     lastActivity: Date.now(),
   };
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify(authData));
+
   api.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
 
   return user;
 }
 
 export async function logout(): Promise<void> {
-  const auth = getAuth();
-
-  if (auth?.refresh_token) {
-    try {
-      await api.post("/sessions/logout", {
-        refresh_token: auth.refresh_token,
-      });
-    } catch (error) {
-      console.error("Erro ao fazer logout na API:", error);
-    }
+  try {
+    await api.post("/sessions/logout"); // 🔥 sem body
+  } catch (error) {
+    console.error("Erro ao fazer logout:", error);
   }
 
   localStorage.removeItem(STORAGE_KEY);
   localStorage.removeItem("keepConnected");
+
   delete api.defaults.headers.common["Authorization"];
 }
 
-export function setTokens(access_token: string, refresh_token: string) {
-  const auth = getAuth();
-  if (auth) {
-    auth.access_token = access_token;
-    auth.refresh_token = refresh_token;
-    auth.lastActivity = Date.now();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(auth));
-    api.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
-  }
+export function setTokens(access_token: string) {
+  const auth = getAuth() || {};
+
+  const newAuth = {
+    ...auth,
+    access_token,
+    lastActivity: Date.now(),
+  };
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(newAuth));
+
+  api.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
 }
 
 export function getAuth(): AuthStorage | null {
@@ -120,10 +116,6 @@ export function getAccessToken(): string | null {
   return getAuth()?.access_token || null;
 }
 
-export function getRefreshToken(): string | null {
-  return getAuth()?.refresh_token || null;
-}
-
 function getIdleLimit(): number {
   const keepConnected = localStorage.getItem("keepConnected") === "true";
   return keepConnected ? KEEP_CONNECTED_LIMIT : IDLE_LIMIT;
@@ -141,32 +133,18 @@ export function isAuthenticated(): boolean {
   const auth = getAuth();
 
   if (!auth?.access_token) return false;
-  if (!isUserActive()) return false;
 
-  const tokenExpired = isTokenExpired(auth.access_token);
-  if (tokenExpired) return false;
+  if (!isUserActive()) return false;
 
   const idleLimit = getIdleLimit();
   const now = Date.now();
   const isIdle = now - auth.lastActivity > idleLimit;
 
   if (isIdle) {
-    logout();
     return false;
   }
 
   return true;
-}
-
-function isTokenExpired(token: string): boolean {
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    const exp = payload.exp;
-    if (!exp) return false;
-    return Date.now() >= exp * 1000;
-  } catch {
-    return true;
-  }
 }
 
 export function getTokenPayload() {
