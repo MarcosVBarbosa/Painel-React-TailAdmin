@@ -35,6 +35,7 @@ export interface PermissionActions {
 export interface FormRolesUserData {
   id: number;
   name: string;
+  description: string;
   crud: Record<string, PermissionActions>;
   status: boolean | number;
 }

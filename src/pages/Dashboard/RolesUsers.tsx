@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import BasicTable from "../../components/tables/basicTable";
-import { Column, PermissionActions } from "../../interface";
+import { Column, FormRolesUserData, PermissionActions } from "../../interface";
 import { Modal } from "../../components/ui/modal";
 
 import { api } from "../../services/api";
@@ -9,8 +9,9 @@ import FormRolesUser from "../../modals/FormRolesUser";
 export interface Row {
   id: number;
   name: string;
+  description: string;
   crud: Record<string, PermissionActions>;
-  status: string;
+  status: boolean;
 }
 
 const columns: Column<Row>[] = [
@@ -19,13 +20,15 @@ const columns: Column<Row>[] = [
     title: "Nome",
     field: "name",
   },
-  {
-    id: 2,
-    title: "Status",
-    field: "status",
-    className: "w-20",
-  },
 ];
+
+const FormRolesUserClear: FormRolesUserData = {
+  id: 0,
+  name: "",
+  description: "",
+  crud: {},
+  status: true,
+};
 
 export default function RolesUsers() {
   const [rows, setRows] = useState<Row[]>([]);
@@ -42,7 +45,7 @@ export default function RolesUsers() {
         id: item.id,
         name: item.name,
         crud: item.crud,
-        status: item.status ? "Ativo" : "Inativo",
+        status: item.status,
       }));
 
       setRows(mapped);
@@ -65,7 +68,7 @@ export default function RolesUsers() {
 
   // 🔽 NOVO
   const handleNew = () => {
-    setSelected(null);
+    setSelected(FormRolesUserClear);
     setIsModalOpen(true);
   };
 
@@ -110,10 +113,10 @@ export default function RolesUsers() {
           onCancel={() => setIsModalOpen(false)}
           onSave={(data) => {
             const newRow: Row = {
-              id: data.id || Date.now(),
+              id: data.id,
               name: data.name,
               crud: data.crud,
-              status: data.status ? "Ativo" : "Inativo",
+              status: data.status,
             };
 
             setRows((prev) => {

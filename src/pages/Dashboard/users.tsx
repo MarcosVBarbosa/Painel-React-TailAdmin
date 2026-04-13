@@ -1,23 +1,33 @@
 import { useState, useEffect } from "react";
 import BasicTable from "../../components/tables/basicTable";
-import { Column, UserFormData } from "../../interface";
+import { Column, FormRolesUserData, UserFormData } from "../../interface";
 import { Modal } from "../../components/ui/modal";
 import UserForm from "../../modals/FormUser";
 import { api } from "../../services/api";
-import { Rows as RolesRows } from "./RolesUsers";
 
 export interface Row {
   id: number;
   name: string;
-  roles: string; // ✅ corrigido
+  rolesName: string;
   role_id: number;
   username: string;
-  status: string;
+  status: boolean;
 }
 
 type RoleOption = {
   value: string;
   label: string;
+};
+
+type UserApiResponse = {
+  id: number;
+  name: string;
+  username: string;
+  role_id: number;
+  role?: {
+    name: string;
+  };
+  status: boolean;
 };
 
 const columns: Column<Row>[] = [
@@ -29,7 +39,7 @@ const columns: Column<Row>[] = [
   {
     id: 2,
     title: "Nivel",
-    field: "roles",
+    field: "rolesName",
     className: "w-20",
   },
   {
@@ -60,13 +70,13 @@ export default function Users() {
     try {
       const response = (await api.get("/Users/?includelist=role")).data.data;
 
-      const mapRows = response.map((row: any) => ({
+      const mapRows: Row[] = response.map((row: UserApiResponse) => ({
         id: row.id,
         name: row.name,
         username: row.username,
         role_id: row.role_id,
-        roles: row.roles?.description || "",
-        status: row.status ? "Ativo" : "Inativo",
+        rolesName: row.role?.name || "",
+        status: row.status,
       }));
 
       setRows(mapRows);
@@ -83,9 +93,9 @@ export default function Users() {
       const res = await api.get("/Roles/");
       const response = res.data.data || [];
 
-      const mapped = response.map((item: RolesRows) => ({
+      const mapped: RoleOption[] = response.map((item: FormRolesUserData) => ({
         value: String(item.id),
-        label: item.description,
+        label: item.name,
       }));
 
       setRolesOptions(mapped);
@@ -117,14 +127,13 @@ export default function Users() {
 
     if (!userToEdit) return;
 
-    // 🔥 converte Row → UserFormData
     setSelected({
       id: userToEdit.id,
       name: userToEdit.name,
       username: userToEdit.username,
       password: "",
       role_id: String(userToEdit.role_id),
-      status: userToEdit.status === "Ativo",
+      status: userToEdit.status,
     });
 
     setIsModalOpen(true);
@@ -146,34 +155,37 @@ export default function Users() {
       )}
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <UserForm
-          data={selected}
-          onCancel={() => setIsModalOpen(false)}
-          onSave={(data) => {
-            setRows((prev) => {
-              const role = rolesOptions.find((r) => r.value === data.role_id);
+        {selected && (
+          <UserForm
+            data={selected}
+            rolesOptions={rolesOptions}
+            onCancel={() => setIsModalOpen(false)}
+            onSave={(data) => {
+              setRows((prev) => {
+                const role = rolesOptions.find((r) => r.value === data.role_id);
 
-              const newRow: Row = {
-                id: data.id || Date.now(),
-                name: data.name,
-                username: data.username,
-                role_id: Number(data.role_id),
-                roles: role?.label || "",
-                status: data.status ? "Ativo" : "Inativo",
-              };
+                const newRow: Row = {
+                  id: data.id,
+                  name: data.name,
+                  username: data.username,
+                  role_id: Number(data.role_id),
+                  rolesName: role?.label || "",
+                  status: data.status,
+                };
 
-              const exists = prev.some((r) => r.id === newRow.id);
+                const exists = prev.some((r) => r.id === newRow.id);
 
-              if (exists) {
-                return prev.map((r) => (r.id === newRow.id ? newRow : r));
-              }
+                if (exists) {
+                  return prev.map((r) => (r.id === newRow.id ? newRow : r));
+                }
 
-              return [newRow, ...prev];
-            });
+                return [newRow, ...prev];
+              });
 
-            setIsModalOpen(false);
-          }}
-        />
+              setIsModalOpen(false);
+            }}
+          />
+        )}
       </Modal>
     </div>
   );
