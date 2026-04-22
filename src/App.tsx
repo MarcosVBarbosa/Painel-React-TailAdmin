@@ -20,7 +20,7 @@ export default function App() {
       <ScrollToTop />
 
       <Routes>
-        {/* 🔓 ROTAS PÚBLICAS */}
+        {/* 🔓 PUBLIC */}
         <Route
           path="/signin"
           element={
@@ -30,7 +30,7 @@ export default function App() {
           }
         />
 
-        {/* 🔐 ROTAS PROTEGIDAS */}
+        {/* 🔐 LAYOUT PROTEGIDO (apenas login) */}
         <Route
           element={
             <PrivateRoute>
@@ -38,10 +38,43 @@ export default function App() {
             </PrivateRoute>
           }
         >
-          <Route path="/" element={<Home />} />
-          <Route path="/users" element={<Users />} />
-          <Route path="/permissionsusers" element={<PermissionsUsers />} />
-          <Route path="/notifications" element={<Notifications />} />
+          {/* 🔥 AGORA CADA ROTA TEM PERMISSÃO */}
+
+          <Route
+            path="/"
+            element={
+              <PrivateRoute module="dashboard">
+                <Home />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/users"
+            element={
+              <PrivateRoute module="users">
+                <Users />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/permissionsusers"
+            element={
+              <PrivateRoute module="permissionsusers">
+                <PermissionsUsers />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/notifications"
+            element={
+              <PrivateRoute module="Notifications">
+                <Notifications />
+              </PrivateRoute>
+            }
+          />
         </Route>
 
         {/* ❌ NOT FOUND */}

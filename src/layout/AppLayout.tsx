@@ -3,18 +3,18 @@ import { Outlet } from "react-router";
 import AppHeader from "./AppHeader";
 import Backdrop from "./Backdrop";
 import AppSidebar from "./AppSidebar";
-// import { useActivity } from "../hooks/useActivity";
-// import { isAuthenticated } from "../utils/auth";
+import { useActivity } from "../hooks/useActivity";
+import { isAuthenticated } from "../utils/auth";
 
 const LayoutContent: React.FC = () => {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
 
-  // // 🔥 SÓ ATIVA SE ESTIVER AUTENTICADO
-  // const isAuth = isAuthenticated();
+  // 🔥 SÓ ATIVA SE ESTIVER AUTENTICADO
+  const isAuth = isAuthenticated();
 
-  // useActivity({
-  //   timeout: isAuth ? 15 * 60 * 1000 : undefined,
-  // });
+  useActivity({
+    timeout: isAuth ? 15 * 60 * 1000 : undefined,
+  });
 
   return (
     <div className="min-h-screen w-full bg-gray-50 dark:bg-[#0B1220]">

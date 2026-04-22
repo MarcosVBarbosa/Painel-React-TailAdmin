@@ -27,6 +27,7 @@ interface CategoryGroup {
   resources: Resource[];
 }
 
+// 🔥 GERA GRUPOS BASEADOS NO SIDEBAR
 const getGroupsFromNav = (items: NavItem[]): CategoryGroup[] => {
   const groups: CategoryGroup[] = [];
 
@@ -38,7 +39,8 @@ const getGroupsFromNav = (items: NavItem[]): CategoryGroup[] => {
         hasSubItems: true,
         resources: item.subItems.map((sub) => ({
           key:
-            sub.path.replace(/^\//, "") ||
+            sub.permission ||
+            sub.path?.replace(/^\//, "") ||
             sub.name.toLowerCase().replace(/\s+/g, "_"),
           label: sub.name,
         })),
@@ -51,7 +53,8 @@ const getGroupsFromNav = (items: NavItem[]): CategoryGroup[] => {
         resources: [
           {
             key:
-              item.path.replace(/^\//, "") ||
+              item.permission ||
+              item.path?.replace(/^\//, "") ||
               item.name.toLowerCase().replace(/\s+/g, "_"),
             label: item.name,
           },
@@ -81,32 +84,28 @@ export default function FormRolesUser({
     [],
   );
 
-  const [formData, setFormData] = useState<FormRolesUserData>(() => {
-    return data ? { ...defaultFormData, ...data } : defaultFormData;
-  });
+  const [formData, setFormData] = useState<FormRolesUserData>(defaultFormData);
 
   const [loading, setLoading] = useState(false);
 
   const isEdit = data?.id !== 0;
 
-  // 🔽 montar permissões padrão
+  // 🔥 MONTA E NORMALIZA PERMISSÕES
   const buildRoles = (base?: any) => {
-    const Roles = { ...(base || {}) };
+    const roles = { ...(base || {}) };
 
     groups.forEach((group) => {
       group.resources.forEach((res) => {
-        if (!Roles[res.key]) {
-          Roles[res.key] = {
-            view: false,
-            create: false,
-            edit: false,
-            delete: false,
-          };
-        }
+        roles[res.key] = {
+          view: roles[res.key]?.view ?? false,
+          create: roles[res.key]?.create ?? false,
+          edit: roles[res.key]?.edit ?? false,
+          delete: roles[res.key]?.delete ?? false,
+        };
       });
     });
 
-    return Roles;
+    return roles;
   };
 
   useEffect(() => {
@@ -141,14 +140,17 @@ export default function FormRolesUser({
     }));
   };
 
-  // 🔽 submit com POST / PUT
+  // 🔥 SUBMIT CORRIGIDO
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
       setLoading(true);
 
-      const payload = { ...formData, description: "coluna será excluida" };
+      const payload = {
+        ...formData,
+        crud: formData.crud,
+      };
 
       if (isEdit) {
         await api.put(`/roles/${payload.id}`, payload);
@@ -164,69 +166,63 @@ export default function FormRolesUser({
     }
   };
 
-  const headerContent = (
-    <div className="flex flex-col gap-0.5">
-      <h3 className="text-[18px] font-bold text-gray-800 dark:text-white">
-        {isEdit ? "Editar Permissão" : "Cadastrar Permissão"}
-      </h3>
-      <p className="text-xs text-gray-400">
-        Configure os acessos do sistema abaixo.
-      </p>
-    </div>
-  );
-
-  const bodyContent = (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      <div className="space-y-5">
-        {/* Nome */}
-        <div>
-          <Label className="mb-1.5 block text-[13px] font-bold text-gray-700">
-            Nome da Permissão
-          </Label>
-
-          <Input
-            type="text"
-            value={formData.name}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, name: e.target.value }))
-            }
-            className="w-full rounded-xl border-gray-100 bg-gray-50/30 focus:bg-white"
-          />
+  return (
+    <CardBasic
+      className="min-w-[500px] max-w-[800px]"
+      headerContent={
+        <div className="flex flex-col gap-0.5">
+          <h3 className="text-[18px] font-bold text-gray-800 dark:text-white">
+            {isEdit ? "Editar Permissão" : "Cadastrar Permissão"}
+          </h3>
+          <p className="text-xs text-gray-400">
+            Configure os acessos do sistema abaixo.
+          </p>
         </div>
+      }
+      bodyContent={
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Nome */}
+          <div>
+            <Label className="mb-1.5 block text-[13px] font-bold">
+              Nome da Permissão
+            </Label>
 
-        {/* Status (somente edição) */}
-        {isEdit && (
-          <div className="flex items-center justify-between rounded-xl border border-gray-50 bg-gray-50/20 p-3">
-            <div className="flex flex-col">
-              <span className="text-[13px] font-bold text-gray-700">
-                Status do Nível
-              </span>
-              <span className="text-[11px] text-gray-400">
-                Ative ou desative este nível de acesso
-              </span>
-            </div>
-
-            <Switch
-              label={formData.status ? "Ativo" : "Inativo"}
-              defaultChecked={formData.status}
-              onChange={(checked) =>
-                setFormData((prev) => ({ ...prev, status: checked }))
+            <Input
+              type="text"
+              value={formData.name}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  name: e.target.value,
+                }))
               }
             />
           </div>
-        )}
 
-        {/* Matriz de Acessos */}
-        <div className="space-y-6 pt-2">
-          <Label className="block text-[14px] font-bold text-gray-800 border-b pb-2">
-            Matriz de Acessos
-          </Label>
+          {/* Status */}
+          {isEdit && (
+            <div className="flex items-center justify-between p-3 border rounded-xl">
+              <span className="text-[13px] font-bold">Status do Nível</span>
 
+              <Switch
+                label={formData.status ? "Ativo" : "Inativo"}
+                defaultChecked={formData.status}
+                onChange={(checked) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    status: checked,
+                  }))
+                }
+              />
+            </div>
+          )}
+
+          {/* MATRIZ */}
           <div className="space-y-6">
             {groups.map((group) => (
-              <div key={group.id} className="space-y-3">
+              <div key={group.id}>
                 {group.hasSubItems && (
-                  <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider ml-1">
+                  <div className="text-xs font-bold text-gray-400 mb-2">
                     {group.title}
                   </div>
                 )}
@@ -234,16 +230,14 @@ export default function FormRolesUser({
                 {group.resources.map((resource) => (
                   <div
                     key={resource.key}
-                    className="flex justify-between items-center border border-gray-100 p-3 rounded-xl bg-gray-50/10"
+                    className="flex justify-between items-center border p-3 rounded-xl mb-2"
                   >
-                    <span className="text-[13px] font-semibold text-gray-700">
-                      {resource.label}
-                    </span>
+                    <span>{resource.label}</span>
 
-                    <div className="flex gap-1.5">
+                    <div className="flex gap-1">
                       {CRUD_ACTIONS.map((action) => {
-                        const isActive =
-                          !!formData.crud?.[resource.key]?.[action.key];
+                        const active =
+                          formData.crud?.[resource.key]?.[action.key];
 
                         return (
                           <button
@@ -253,13 +247,11 @@ export default function FormRolesUser({
                               handleTogglePermission(
                                 resource.key,
                                 action.key,
-                                !isActive,
+                                !active,
                               )
                             }
-                            className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all duration-200 ${
-                              isActive
-                                ? "bg-blue-600 text-white shadow-sm shadow-blue-600/20"
-                                : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                            className={`px-3 py-1 rounded ${
+                              active ? "bg-blue-600 text-white" : "bg-gray-200"
                             }`}
                           >
                             {action.label}
@@ -272,38 +264,19 @@ export default function FormRolesUser({
               </div>
             ))}
           </div>
-        </div>
-      </div>
-    </form>
-  );
+        </form>
+      }
+      footerContent={
+        <>
+          <button type="button" onClick={onCancel}>
+            Cancelar
+          </button>
 
-  const footerContent = (
-    <>
-      <button
-        type="button"
-        onClick={onCancel}
-        className="px-4 py-2 text-[13px] font-bold text-gray-500 hover:text-gray-700"
-      >
-        Cancelar
-      </button>
-
-      <button
-        type="submit"
-        onClick={handleSubmit}
-        disabled={loading}
-        className="rounded-xl bg-blue-600 px-6 py-2.5 text-[13px] font-bold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700 active:scale-95 disabled:opacity-50"
-      >
-        {loading ? "Salvando..." : isEdit ? "Salvar Edição" : "Criar Permissão"}
-      </button>
-    </>
-  );
-
-  return (
-    <CardBasic
-      headerContent={headerContent}
-      bodyContent={bodyContent}
-      footerContent={footerContent}
-      className="min-w-[500px] max-w-[800px]"
+          <button type="submit" disabled={loading}>
+            {loading ? "Salvando..." : "Salvar"}
+          </button>
+        </>
+      }
     />
   );
 }

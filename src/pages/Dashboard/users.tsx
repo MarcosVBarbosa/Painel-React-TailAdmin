@@ -24,7 +24,7 @@ type UserApiResponse = {
   name: string;
   username: string;
   role_id: number;
-  role?: {
+  roles?: {
     name: string;
   };
   status: boolean;
@@ -75,7 +75,7 @@ export default function Users() {
         name: row.name,
         username: row.username,
         role_id: row.role_id,
-        rolesName: row.role?.name || "",
+        rolesName: row.roles?.name || "",
         status: row.status,
       }));
 
